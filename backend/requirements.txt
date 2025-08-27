@@ -1,0 +1,5 @@
+Flask>=2.2
+Flask-CORS>=4.0
+pyspark>=3.3
+pandas>=1.5
+numpy>=1.21
