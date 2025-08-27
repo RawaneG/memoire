@@ -21,3 +21,5 @@ Thumbs.db
 .ipynb_checkpoints/
 # Ignore LFS pointers for large files
 *.pack
+.claude/
+.claude/settings.local.json
