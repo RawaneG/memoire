@@ -39,17 +39,18 @@ npm run build
 
 ### 🎭 Technologies Utilisées
 
-| Technologie | Version | Usage |
-|-------------|---------|-------|
-| **React** | 18.2.0 | Framework UI principal |
+| Technologie       | Version  | Usage                     |
+| ----------------- | -------- | ------------------------- |
+| **React**         | 18.2.0   | Framework UI principal    |
 | **Framer Motion** | 10.16.16 | Animations et transitions |
-| **Tailwind CSS** | 3.3.6 | Styles et mise en page |
-| **Recharts** | 2.8.0 | Visualisation de données |
-| **Lucide React** | 0.294.0 | Icônes modernes |
+| **Tailwind CSS**  | 3.3.6    | Styles et mise en page    |
+| **Recharts**      | 2.8.0    | Visualisation de données  |
+| **Lucide React**  | 0.294.0  | Icônes modernes           |
 
 ### 🎨 Système de Design
 
 #### **Palette de Couleurs**
+
 ```css
 /* Couleurs Principales */
 --primary-blue: #0ea5e9    /* Bleu principal */
@@ -65,15 +66,16 @@ npm run build
 ```
 
 #### **Typographie**
+
 ```css
 /* Police Principale */
-font-family: 'Inter', system-ui, sans-serif;
+font-family: "Inter", system-ui, sans-serif;
 
 /* Poids Disponibles */
 font-weight: 300, 400, 500, 600, 700, 800, 900;
 
 /* Police Monospace */
-font-family: 'JetBrains Mono', Monaco, Consolas, monospace;
+font-family: "JetBrains Mono", Monaco, Consolas, monospace;
 ```
 
 ### 🧩 Structure des Composants
@@ -81,14 +83,16 @@ font-family: 'JetBrains Mono', Monaco, Consolas, monospace;
 #### **Composants Principaux**
 
 1. **App.js** - Composant racine de l'application
+
    ```jsx
    // Gère l'état global et la logique principale
-   const [country, setCountry] = useState('Senegal');
-   const [model, setModel] = useState('random_forest');
+   const [country, setCountry] = useState("Senegal");
+   const [model, setModel] = useState("random_forest");
    const [predictions, setPredictions] = useState(null);
    ```
 
 2. **BackgroundElements.jsx** - Effets visuels d'arrière-plan
+
    ```jsx
    // Particules flottantes et dégradés animés
    - 20 particules animées
@@ -97,6 +101,7 @@ font-family: 'JetBrains Mono', Monaco, Consolas, monospace;
    ```
 
 3. **CountrySelector.jsx** - Sélecteur de pays avancé
+
    ```jsx
    // Fonctionnalités
    - Recherche en temps réel
@@ -106,6 +111,7 @@ font-family: 'JetBrains Mono', Monaco, Consolas, monospace;
    ```
 
 4. **ModelSelector.jsx** - Sélection de modèles ML
+
    ```jsx
    // Types de modèles
    - Régression Linéaire (rapide, simple)
@@ -125,37 +131,37 @@ font-family: 'JetBrains Mono', Monaco, Consolas, monospace;
 #### **Hooks Personnalisés**
 
 **useApi.js** - Gestion des appels API
+
 ```javascript
 const { loading, error, predict, getCountries } = useApi();
 
 // Fonctions disponibles
-- predict(country, model, horizon)
-- getCountries()
-- getModels()
-- getHealth()
+-predict(country, model, horizon) - getCountries() - getModels() - getHealth();
 ```
 
 ### 🎬 Animations et Interactions
 
 #### **Framer Motion Variants**
+
 ```javascript
 // Animation d'entrée
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.1 }
-  }
+    transition: { staggerChildren: 0.1 },
+  },
 };
 
 // Animation d'éléments
 const itemVariants = {
   hidden: { y: 20, opacity: 0 },
-  visible: { y: 0, opacity: 1 }
+  visible: { y: 0, opacity: 1 },
 };
 ```
 
 #### **Classes CSS Personnalisées**
+
 ```css
 /* Morphisme de verre */
 .glass-morphism {
@@ -179,51 +185,62 @@ const itemVariants = {
 ### 📱 Responsive Design
 
 #### **Points de Rupture**
+
 ```css
 /* Mobile */
 @media (max-width: 768px) {
-  .card-primary { padding: 1.5rem; }
-  .text-5xl { font-size: 2.5rem; }
+  .card-primary {
+    padding: 1.5rem;
+  }
+  .text-5xl {
+    font-size: 2.5rem;
+  }
 }
 
 /* Tablette */
 @media (min-width: 769px) and (max-width: 1024px) {
-  .grid-cols-3 { grid-template-columns: repeat(2, 1fr); }
+  .grid-cols-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 /* Desktop */
 @media (min-width: 1025px) {
-  .grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid-cols-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 ```
 
 ### 🔧 Configuration et Personnalisation
 
 #### **Tailwind Configuration**
+
 ```javascript
 // tailwind.config.js
 module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        'inter': ['Inter', 'system-ui', 'sans-serif'],
+        inter: ["Inter", "system-ui", "sans-serif"],
       },
       colors: {
         primary: {
-          500: '#0ea5e9',
-          600: '#0284c7',
-        }
+          500: "#0ea5e9",
+          600: "#0284c7",
+        },
       },
       animation: {
-        'gradient-x': 'gradient-x 3s ease infinite',
-        'float': 'float 6s ease-in-out infinite',
-      }
-    }
-  }
+        "gradient-x": "gradient-x 3s ease infinite",
+        float: "float 6s ease-in-out infinite",
+      },
+    },
+  },
 };
 ```
 
 #### **Variables d'Environnement**
+
 ```bash
 # .env
 REACT_APP_API_URL=http://localhost:5001
@@ -279,6 +296,7 @@ backend/
 ### 🔌 Endpoints de l'API
 
 #### **1. Santé du Service**
+
 ```http
 GET /health
 
@@ -292,6 +310,7 @@ Réponse:
 ```
 
 #### **2. Liste des Pays**
+
 ```http
 GET /countries
 
@@ -313,6 +332,7 @@ Réponse:
 ```
 
 #### **3. Modèles Disponibles**
+
 ```http
 GET /models
 
@@ -334,6 +354,7 @@ Réponse:
 ```
 
 #### **4. Génération de Prédictions**
+
 ```http
 GET /predict?country=Senegal&model=random_forest&horizon=14
 
@@ -367,6 +388,7 @@ Réponse:
 ### 🤖 Modèles d'Apprentissage Automatique
 
 #### **1. Régression Linéaire**
+
 ```python
 # Caractéristiques
 - Complexité: Faible
@@ -384,6 +406,7 @@ LinearRegression(
 ```
 
 #### **2. Forêt Aléatoire**
+
 ```python
 # Caractéristiques
 - Complexité: Moyenne
@@ -402,6 +425,7 @@ RandomForestRegressor(
 ```
 
 #### **3. Gradient Boosting**
+
 ```python
 # Caractéristiques
 - Complexité: Élevée
@@ -422,6 +446,7 @@ GBTRegressor(
 ### 🌍 Configuration Spécifique par Pays
 
 #### **Sénégal (Optimisé)**
+
 ```python
 COUNTRY_CONFIGS = {
     'Senegal': {
@@ -437,6 +462,7 @@ COUNTRY_CONFIGS = {
 ### 🔒 Sécurité et CORS
 
 #### **Configuration CORS**
+
 ```python
 @app.after_request
 def after_request(response):
@@ -447,6 +473,7 @@ def after_request(response):
 ```
 
 #### **Gestion des Erreurs**
+
 ```python
 try:
     result = predict_cases(country, model, horizon)
@@ -466,6 +493,7 @@ except Exception as exc:
 ### 🔧 Développement Local
 
 #### **Étape 1: Préparer l'Environnement**
+
 ```bash
 # Cloner le projet
 git clone <votre-repo>
@@ -483,6 +511,7 @@ npm install
 ```
 
 #### **Étape 2: Lancer les Serveurs**
+
 ```bash
 # Terminal 1: Backend
 cd backend
@@ -498,6 +527,7 @@ npm start
 ### 🌐 Déploiement Production
 
 #### **Frontend (Vercel - Recommandé)**
+
 ```bash
 # Construire l'application
 npm run build
@@ -518,6 +548,7 @@ npx vercel --prod
 ```
 
 #### **Backend (Heroku)**
+
 ```bash
 # Créer Procfile
 echo "web: python simple_app.py" > Procfile
@@ -532,6 +563,7 @@ heroku config:set PORT=5000
 ```
 
 #### **Docker (Méthode Alternative)**
+
 ```dockerfile
 # Dockerfile pour le backend
 FROM python:3.9-slim
@@ -560,6 +592,7 @@ CMD ["npx", "serve", "-s", "build"]
 ### ✅ Tests Frontend
 
 #### **Tests Unitaires**
+
 ```bash
 # Lancer les tests
 npm test
@@ -572,20 +605,22 @@ npm test -- --watch
 ```
 
 #### **Tests d'Intégration**
+
 ```javascript
 // Exemple de test composant
-import { render, screen } from '@testing-library/react';
-import CountrySelector from '../components/CountrySelector';
+import { render, screen } from "@testing-library/react";
+import CountrySelector from "../components/CountrySelector";
 
-test('affiche le sélecteur de pays', () => {
+test("affiche le sélecteur de pays", () => {
   render(<CountrySelector value="Senegal" onChange={jest.fn()} />);
-  expect(screen.getByText('Senegal')).toBeInTheDocument();
+  expect(screen.getByText("Senegal")).toBeInTheDocument();
 });
 ```
 
 ### 🔍 Tests Backend
 
 #### **Tests API**
+
 ```bash
 # Tester les endpoints
 curl -X GET "http://localhost:5001/health"
@@ -594,6 +629,7 @@ curl -X GET "http://localhost:5001/predict?country=Senegal&model=random_forest&h
 ```
 
 #### **Tests Python**
+
 ```python
 # test_api.py
 import unittest
@@ -602,7 +638,7 @@ from simple_app import app
 class APITestCase(unittest.TestCase):
     def setUp(self):
         self.app = app.test_client()
-    
+
     def test_health_endpoint(self):
         response = self.app.get('/health')
         self.assertEqual(response.status_code, 200)
@@ -615,12 +651,14 @@ if __name__ == '__main__':
 ### 📊 Métriques de Performance
 
 #### **Objectifs Frontend**
+
 - ⚡ **First Contentful Paint**: < 1.5s
 - 🎯 **Largest Contentful Paint**: < 2.5s
 - 🚀 **Time to Interactive**: < 3.5s
 - 📐 **Cumulative Layout Shift**: < 0.1
 
 #### **Métriques Backend**
+
 - 🔥 **Temps de réponse API**: < 200ms
 - 💾 **Utilisation mémoire**: < 512MB
 - ⚙️ **Charge CPU**: < 70%
@@ -634,6 +672,7 @@ if __name__ == '__main__':
 #### **Frontend**
 
 **1. Erreurs CORS**
+
 ```bash
 # Vérifier que le backend est sur le bon port
 Backend: http://localhost:5001 ✓
@@ -643,6 +682,7 @@ Frontend: http://localhost:3000 ✓
 ```
 
 **2. Styles Tailwind non appliqués**
+
 ```bash
 # Vérifier postcss.config.js
 module.exports = {
@@ -657,18 +697,20 @@ npm install
 ```
 
 **3. Animations Framer Motion saccadées**
+
 ```javascript
 // Optimiser les animations
 const variants = {
   animate: {
-    transition: { duration: 0.3, ease: "easeOut" }
-  }
+    transition: { duration: 0.3, ease: "easeOut" },
+  },
 };
 ```
 
 #### **Backend**
 
 **1. Erreur Port Occupé**
+
 ```bash
 # Changer le port
 python -c "from simple_app import app; app.run(port=5002)"
@@ -679,6 +721,7 @@ taskkill /PID <PID> /F
 ```
 
 **2. Erreur Modules Python**
+
 ```bash
 # Réinstaller l'environnement virtuel
 deactivate
@@ -689,6 +732,7 @@ pip install -r requirements.txt
 ```
 
 **3. Données Manquantes**
+
 ```python
 # Le fichier simple_app.py génère des données de démo
 # Pas besoin de fichier CSV externe
@@ -697,12 +741,14 @@ pip install -r requirements.txt
 ### 📞 Support et Communauté
 
 #### **Ressources Utiles**
+
 - 📚 **Documentation React**: https://reactjs.org/docs
 - 🎨 **Framer Motion**: https://framer.com/motion
 - 🎨 **Tailwind CSS**: https://tailwindcss.com/docs
 - ⚡ **Flask Documentation**: https://flask.palletsprojects.com
 
 #### **Contact et Contribution**
+
 ```bash
 # Signaler un bug
 Issues: https://github.com/votre-repo/issues
@@ -714,17 +760,3 @@ Issues: https://github.com/votre-repo/issues
 4. Push vers la branche
 5. Ouvrir une Pull Request
 ```
-
----
-
-## 🎉 Félicitations!
-
-Vous avez maintenant une documentation complète pour votre système OWID Predictor. Cette plateforme de prédiction COVID-19 combine:
-
-- 🎨 **Interface moderne** avec animations fluides
-- 🤖 **Intelligence artificielle** pour les prédictions
-- 🌍 **Optimisation Sénégal** avec configurations spéciales
-- 📊 **Visualisations interactives** de données
-- 🚀 **Performance optimale** pour tous les appareils
-
-Votre application est maintenant prête pour impressionner et rivaliser avec les meilleures plateformes de data science! 🏆✨
