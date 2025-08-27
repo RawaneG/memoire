@@ -1,0 +1,23 @@
+# Ignore node_modules and other large files
+node_modules/
+frontend/node_modules/
+backend/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+# Ignore cache and build artifacts
+.cache/
+dist/
+build/
+*.log
+# Ignore OS files
+.DS_Store
+Thumbs.db
+# Ignore environment files
+.env
+.env.*
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+# Ignore LFS pointers for large files
+*.pack
