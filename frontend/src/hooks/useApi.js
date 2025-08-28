@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
+import { config } from '../config/environments';
 
-const API_BASE_URL = 'http://localhost:5000';
+const API_BASE_URL = config.API_BASE_URL;
 
 // Fallback data when backend is not available
 const FALLBACK_DATA = {

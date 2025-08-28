@@ -33,6 +33,31 @@ OWID Predictor combine des visualisations de données interactives avec des mod�
 - Python 3.8+
 - pip gestionnaire de paquets
 
+### ⚙️ Configuration des Environnements
+
+Le projet utilise un module de configuration centralisé pour gérer les URLs d'API selon l'environnement :
+
+**Fichier:** `frontend/src/config/environments.js`
+
+```javascript
+const environments = {
+  development: {
+    API_BASE_URL: 'http://localhost:5000',
+  },
+  production: {
+    API_BASE_URL: 'https://your-production-api.com',
+  },
+  staging: {
+    API_BASE_URL: 'https://your-staging-api.com',
+  }
+};
+```
+
+**Avantages:**
+- ✅ Configuration centralisée des URLs d'API
+- ✅ Basculement automatique selon `NODE_ENV`
+- ✅ Pas besoin de modifier le code pour changer d'environnement
+
 ### ⚡ Installation Rapide
 
 #### 1. Cloner le Projet
@@ -53,10 +78,10 @@ python -m venv venv
 
 # Activer l'environnement virtuel
 
-# Windows (Command Prompt):
-venv\Scripts\activate
-# Mac/Linux:
-source venv/bin/activate
+  # Windows (Command Prompt Terminal):
+  venv\Scripts\activate
+  # Mac/Linux:
+  source venv/bin/activate
 
 # Installer les dépendances (y compris Apache Spark)
 pip install -r requirements.txt
@@ -104,7 +129,10 @@ OWID/
 │   │   │   ├── CountrySelector.jsx
 │   │   │   ├── ModelSelector.jsx
 │   │   │   ├── PredictionChart.jsx
+│   │   │   ├── OfflineNotice.jsx
 │   │   │   └── ...
+│   │   ├── config/             # Configuration et environnements
+│   │   │   └── environments.js # Configuration API par environnement
 │   │   ├── hooks/              # Hooks personnalisés
 │   │   │   └── useApi.js
 │   │   ├── App.js              # Composant racine
@@ -130,15 +158,15 @@ OWID/
 
 #### Backend
 
-| Technologie       | Usage                               |
-| ----------------- | ----------------------------------- |
-| **Flask**         | Framework web Python                |
-| **Apache Spark**  | Traitement de données à grande échelle |
-| **PySpark ML**    | Modèles d'apprentissage automatique |
-| **scikit-learn**  | Modèles ML (version simplifiée)     |
-| **pandas**        | Manipulation de données             |
-| **numpy**         | Calculs numériques                  |
-| **CORS**          | Support cross-origin                |
+| Technologie      | Usage                                  |
+| ---------------- | -------------------------------------- |
+| **Flask**        | Framework web Python                   |
+| **Apache Spark** | Traitement de données à grande échelle |
+| **PySpark ML**   | Modèles d'apprentissage automatique    |
+| **scikit-learn** | Modèles ML (version simplifiée)        |
+| **pandas**       | Manipulation de données                |
+| **numpy**        | Calculs numériques                     |
+| **CORS**         | Support cross-origin                   |
 
 ---
 
@@ -147,13 +175,15 @@ OWID/
 ### 🌍 1. Sélection du Pays
 
 #### **Pays Africains Configurés** (5)
+
 - 🇸🇳 **Sénégal** - Modèle recommandé: Forêt Aléatoire
-- 🇳🇬 **Nigeria** - Modèle recommandé: Forêt Aléatoire  
+- 🇳🇬 **Nigeria** - Modèle recommandé: Forêt Aléatoire
 - 🇿🇦 **Afrique du Sud** - Modèle recommandé: Gradient Boosting
 - 🇰🇪 **Kenya** - Modèle recommandé: Forêt Aléatoire
 - 🇲🇦 **Maroc** - Modèle recommandé: Gradient Boosting
 
 #### **Pays Développés Configurés** (5)
+
 - 🇫🇷 **France** - Modèle recommandé: Gradient Boosting
 - 🇩🇪 **Allemagne** - Modèle recommandé: Gradient Boosting
 - 🇬🇧 **Royaume-Uni** - Modèle recommandé: Gradient Boosting
@@ -161,6 +191,7 @@ OWID/
 - 🇨🇦 **Canada** - Modèle recommandé: Gradient Boosting
 
 **Fonctionnalités:**
+
 - **Recherche en temps réel**: Tapez pour filtrer la liste des pays
 - **Badge Spécial**: Pays configurés affichent des optimisations spécifiques
 - **Plus de 255 pays disponibles** dans la base de données OWID
@@ -223,11 +254,7 @@ GET /health
   "status": "healthy",
   "service": "OWID COVID-19 Prediction API",
   "version": "2.0",
-  "features": [
-    "multi-model",
-    "country-specific", 
-    "senegal-optimized"
-  ]
+  "features": ["multi-model", "country-specific", "senegal-optimized"]
 }
 ```
 
@@ -282,7 +309,7 @@ GET /models
   },
   "recommended_by_country": {
     "Senegal": "random_forest",
-    "Nigeria": "random_forest", 
+    "Nigeria": "random_forest",
     "Kenya": "random_forest",
     "South Africa": "gradient_boost",
     "Morocco": "gradient_boost",
@@ -326,8 +353,12 @@ Génère des prédictions pour tous les 10 pays configurés en une seule requêt
   "training_samples": 1339,
   "test_samples": 335,
   "features_used": [
-    "cases_lag_1", "cases_lag_7", "deaths_lag_1", 
-    "vaccinations_lag_7", "seasonal_sin", "seasonal_cos"
+    "cases_lag_1",
+    "cases_lag_7",
+    "deaths_lag_1",
+    "vaccinations_lag_7",
+    "seasonal_sin",
+    "seasonal_cos"
   ],
   "metrics": {
     "rmse": 17.5,

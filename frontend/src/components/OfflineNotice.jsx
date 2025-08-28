@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Wifi, WifiOff, X, AlertTriangle } from 'lucide-react';
+import { config } from '../config/environments';
 
 const OfflineNotice = () => {
   const [isOffline, setIsOffline] = useState(false);
@@ -11,7 +12,7 @@ const OfflineNotice = () => {
     // Check if backend is available
     const checkBackendConnection = async () => {
       try {
-        const response = await fetch('http://localhost:5001/health', {
+        const response = await fetch(`${config.API_BASE_URL}/health`, {
           method: 'GET',
           timeout: 3000
         });
