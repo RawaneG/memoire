@@ -1,9 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
+import { useFormatting } from '../hooks/useFormatting';
 import { 
   Target, 
-  Gauge, 
-  TrendingUp, 
   Award, 
   Database,
   Zap,
@@ -12,6 +12,9 @@ import {
 } from 'lucide-react';
 
 const MetricsDisplay = ({ predictions }) => {
+  const { t } = useTranslation();
+  const { formatNumber } = useFormatting();
+  
   if (!predictions) return null;
 
   const { metrics, training_samples, test_samples, features_used, country, model_type } = predictions;
@@ -30,10 +33,10 @@ const MetricsDisplay = ({ predictions }) => {
   };
 
   const getPerformanceDescription = (r2Score) => {
-    if (r2Score >= 0.8) return { text: 'Excellent', color: 'text-green-400' };
-    if (r2Score >= 0.6) return { text: 'Good', color: 'text-yellow-400' };
-    if (r2Score >= 0.4) return { text: 'Fair', color: 'text-orange-400' };
-    return { text: 'Poor', color: 'text-red-400' };
+    if (r2Score >= 0.8) return { text: t('metricsDisplay.performanceLevels.excellent'), color: 'text-green-400' };
+    if (r2Score >= 0.6) return { text: t('metricsDisplay.performanceLevels.good'), color: 'text-yellow-400' };
+    if (r2Score >= 0.4) return { text: t('metricsDisplay.performanceLevels.fair'), color: 'text-orange-400' };
+    return { text: t('metricsDisplay.performanceLevels.poor'), color: 'text-red-400' };
   };
 
   const performance = getPerformanceDescription(metrics.r2_score);
@@ -71,21 +74,21 @@ const MetricsDisplay = ({ predictions }) => {
             <Award className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-white">Model Performance</h3>
-            <p className="text-sm text-white/60">Overall accuracy metrics</p>
+            <h3 className="text-lg font-bold text-white">{t('metricsDisplay.modelPerformance')}</h3>
+            <p className="text-sm text-white/60">{t('metricsDisplay.overallAccuracy')}</p>
           </div>
         </div>
         
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <span className="text-white/80 text-sm">R² Score</span>
+            <span className="text-white/80 text-sm">{t('predictionChart.metrics.r2Score')}</span>
             <div className={`px-3 py-1 rounded-full border text-sm font-bold ${getScoreColor(metrics.r2_score, 'r2')}`}>
               {(metrics.r2_score * 100).toFixed(1)}%
             </div>
           </div>
           
           <div className="flex items-center justify-between">
-            <span className="text-white/80 text-sm">Performance</span>
+            <span className="text-white/80 text-sm">{t('metricsDisplay.performance')}</span>
             <span className={`font-semibold ${performance.color}`}>
               {performance.text}
             </span>
@@ -110,28 +113,28 @@ const MetricsDisplay = ({ predictions }) => {
             <Target className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-white">Error Analysis</h3>
-            <p className="text-sm text-white/60">Prediction accuracy</p>
+            <h3 className="text-lg font-bold text-white">{t('metricsDisplay.errorAnalysis')}</h3>
+            <p className="text-sm text-white/60">{t('metricsDisplay.predictionAccuracy')}</p>
           </div>
         </div>
         
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-white/80 text-sm">RMSE</span>
+            <span className="text-white/80 text-sm">{t('predictionChart.metrics.rmse')}</span>
             <div className={`px-3 py-1 rounded-full border text-sm font-bold ${getScoreColor(metrics.rmse)}`}>
               {metrics.rmse.toFixed(1)}
             </div>
           </div>
           
           <div className="flex items-center justify-between">
-            <span className="text-white/80 text-sm">MAE</span>
+            <span className="text-white/80 text-sm">{t('predictionChart.metrics.mae')}</span>
             <div className={`px-3 py-1 rounded-full border text-sm font-bold ${getScoreColor(metrics.mae)}`}>
               {metrics.mae.toFixed(1)}
             </div>
           </div>
           
           <div className="text-xs text-white/60 pt-2 border-t border-white/10">
-            Lower values indicate better accuracy
+            {t('metricsDisplay.lowerBetter')}
           </div>
         </div>
       </motion.div>
@@ -143,24 +146,24 @@ const MetricsDisplay = ({ predictions }) => {
             <Database className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-white">Training Data</h3>
-            <p className="text-sm text-white/60">Dataset information</p>
+            <h3 className="text-lg font-bold text-white">{t('metricsDisplay.trainingData')}</h3>
+            <p className="text-sm text-white/60">{t('metricsDisplay.datasetInfo')}</p>
           </div>
         </div>
         
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-white/80 text-sm">Training Samples</span>
-            <span className="text-white font-bold">{training_samples?.toLocaleString()}</span>
+            <span className="text-white/80 text-sm">{t('metricsDisplay.trainingSamples')}</span>
+            <span className="text-white font-bold">{formatNumber(training_samples)}</span>
           </div>
           
           <div className="flex items-center justify-between">
-            <span className="text-white/80 text-sm">Test Samples</span>
-            <span className="text-white font-bold">{test_samples?.toLocaleString()}</span>
+            <span className="text-white/80 text-sm">{t('metricsDisplay.testSamples')}</span>
+            <span className="text-white font-bold">{formatNumber(test_samples)}</span>
           </div>
           
           <div className="flex items-center justify-between">
-            <span className="text-white/80 text-sm">Features Used</span>
+            <span className="text-white/80 text-sm">{t('metricsDisplay.featuresUsed')}</span>
             <span className="text-white font-bold">{features_used?.length || 0}</span>
           </div>
         </div>
@@ -173,8 +176,8 @@ const MetricsDisplay = ({ predictions }) => {
             <Settings className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-white">Configuration</h3>
-            <p className="text-sm text-white/60">Model and country settings</p>
+            <h3 className="text-lg font-bold text-white">{t('metricsDisplay.configuration')}</h3>
+            <p className="text-sm text-white/60">{t('metricsDisplay.modelCountrySettings')}</p>
           </div>
         </div>
         
@@ -183,7 +186,7 @@ const MetricsDisplay = ({ predictions }) => {
             <div className="flex items-center space-x-3">
               <MapPin className="w-4 h-4 text-primary-400" />
               <div>
-                <div className="text-sm text-white/60">Country</div>
+                <div className="text-sm text-white/60">{t('metricsDisplay.country')}</div>
                 <div className="text-white font-semibold">{country}</div>
               </div>
             </div>
@@ -191,7 +194,7 @@ const MetricsDisplay = ({ predictions }) => {
             <div className="flex items-center space-x-3">
               <Zap className="w-4 h-4 text-accent-400" />
               <div>
-                <div className="text-sm text-white/60">Model Type</div>
+                <div className="text-sm text-white/60">{t('metricsDisplay.modelType')}</div>
                 <div className="text-white font-semibold">
                   {model_type === 'random_forest' ? 'Random Forest' : 
                    model_type === 'gradient_boost' ? 'Gradient Boosting' : 
@@ -202,7 +205,7 @@ const MetricsDisplay = ({ predictions }) => {
           </div>
           
           <div>
-            <div className="text-sm text-white/60 mb-2">Features ({features_used?.length})</div>
+            <div className="text-sm text-white/60 mb-2">{t('metricsDisplay.features')} ({features_used?.length})</div>
             <div className="max-h-20 overflow-y-auto space-y-1">
               {features_used?.slice(0, 6).map((feature, index) => (
                 <div key={index} className="text-xs px-2 py-1 bg-white/10 rounded-lg text-white/80">
@@ -211,7 +214,7 @@ const MetricsDisplay = ({ predictions }) => {
               ))}
               {features_used?.length > 6 && (
                 <div className="text-xs text-white/60">
-                  +{features_used.length - 6} more
+                  +{features_used.length - 6} {t('metricsDisplay.more')}
                 </div>
               )}
             </div>

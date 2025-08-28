@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Search, MapPin, Star } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useApi } from '../hooks/useApi';
 
 const CountrySelector = ({ value, onChange, onToggle, shouldClose }) => {
@@ -10,6 +11,7 @@ const CountrySelector = ({ value, onChange, onToggle, shouldClose }) => {
   const { getCountries } = useApi();
   const dropdownRef = useRef(null);
   const buttonRef = useRef(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchCountries = async () => {
@@ -137,13 +139,13 @@ const CountrySelector = ({ value, onChange, onToggle, shouldClose }) => {
         }}
         aria-expanded={isOpen}
         aria-haspopup="listbox"
-        aria-label="Select country"
+        aria-label={t('countrySelector.title')}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
       >
         <div className="flex items-center space-x-3">
           <MapPin className="w-5 h-5 text-primary-400" />
-          <span className="truncate">{value || 'Select a country'}</span>
+          <span className="truncate">{value || t('countrySelector.selectCountry')}</span>
           {countries.featured_countries.some(c => c.name === value) && (
             <Star className="w-4 h-4 text-yellow-400" fill="currentColor" />
           )}
@@ -171,7 +173,7 @@ const CountrySelector = ({ value, onChange, onToggle, shouldClose }) => {
               border: '1px solid rgba(255, 255, 255, 0.15)'
             }}
             role="listbox"
-            aria-label="Country options"
+            aria-label={t('countrySelector.featuredCountries')}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Search input */}
@@ -180,7 +182,7 @@ const CountrySelector = ({ value, onChange, onToggle, shouldClose }) => {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/60" />
                 <input
                   type="text"
-                  placeholder="Search countries..."
+                  placeholder={t('countrySelector.searchPlaceholder')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/60 focus:outline-none focus:border-primary-400 transition-colors"
@@ -193,7 +195,7 @@ const CountrySelector = ({ value, onChange, onToggle, shouldClose }) => {
               {filteredFeatured.length > 0 && (
                 <div className="p-2">
                   <div className="px-3 py-2 text-xs font-semibold text-white/60 uppercase tracking-wider">
-                    Featured Countries
+                    {t('countrySelector.featuredCountries')}
                   </div>
                   {filteredFeatured.map((country, index) => (
                     <motion.button
@@ -211,7 +213,7 @@ const CountrySelector = ({ value, onChange, onToggle, shouldClose }) => {
                       </div>
                       {country.name === 'Senegal' && (
                         <span className="px-2 py-1 text-xs bg-green-500/20 text-green-400 rounded-full border border-green-500/30">
-                          Optimized
+                          {t('countrySelector.optimized')}
                         </span>
                       )}
                     </motion.button>
@@ -223,7 +225,7 @@ const CountrySelector = ({ value, onChange, onToggle, shouldClose }) => {
               {filteredOthers.length > 0 && (
                 <div className="p-2 border-t border-white/10">
                   <div className="px-3 py-2 text-xs font-semibold text-white/60 uppercase tracking-wider">
-                    Other Countries
+                    {t('countrySelector.otherCountries')}
                   </div>
                   {filteredOthers.map((country, index) => (
                     <motion.button
@@ -246,7 +248,7 @@ const CountrySelector = ({ value, onChange, onToggle, shouldClose }) => {
               {filteredFeatured.length === 0 && filteredOthers.length === 0 && searchTerm && (
                 <div className="p-8 text-center text-white/60">
                   <Search className="w-8 h-8 mx-auto mb-2 text-white/40" />
-                  <p>No countries found matching "{searchTerm}"</p>
+                  <p>{t('countrySelector.noResults')} "{searchTerm}"</p>
                 </div>
               )}
             </div>

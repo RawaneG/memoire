@@ -12,11 +12,13 @@
     "title": "Select Country",
     "subtitle": "Choose a country for COVID-19 predictions",
     "searchPlaceholder": "Search for a country...",
-    "noResults": "No countries found",
+    "noResults": "No countries found matching",
     "featuredCountries": "Featured Countries",
     "otherCountries": "Other Countries",
-    "specialConfig": "Special Configuration",
-    "totalCountries": "countries available"
+    "specialConfig": "Special Configuration", 
+    "totalCountries": "countries available",
+    "selectCountry": "Select a country",
+    "optimized": "Optimized"
   },
   "modelSelector": {
     "title": "Choose ML Model",
@@ -25,6 +27,17 @@
     "complexity": "Complexity",
     "accuracy": "Accuracy",
     "speed": "Speed",
+    "selectModel": "Select a model",
+    "bestFor": "Best for",
+    "recommendedFor": "is recommended for",
+    "levels": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "veryHigh": "Very High",
+      "fast": "Fast",
+      "slow": "Slow"
+    },
     "models": {
       "linear": {
         "name": "Linear Regression",
@@ -49,6 +62,14 @@
     "loading": "Generating predictions...",
     "error": "Error generating predictions",
     "retry": "Retry",
+    "noData": "No prediction data available",
+    "predictedCases": "Predicted Cases",
+    "confidenceRange": "Confidence Range",
+    "range": "Range",
+    "minimum": "Minimum",
+    "maximum": "Maximum",
+    "average": "Average",
+    "total": "Total",
     "metrics": {
       "title": "Model Metrics",
       "rmse": "RMSE",
@@ -58,7 +79,7 @@
       "testSamples": "Test Samples"
     },
     "chart": {
-      "cases": "Cases",
+      "cases": "Cases", 
       "date": "Date",
       "prediction": "Prediction",
       "confidence": "Confidence Interval"
@@ -74,6 +95,37 @@
     "preparing": "Preparing data...",
     "training": "Training model...",
     "predicting": "Generating predictions..."
+  },
+  "processingSteps": {
+    "fetchingData": "Fetching data",
+    "processingFeatures": "Processing features",
+    "trainingModel": "Training model", 
+    "generatingPredictions": "Generating predictions"
+  },
+  "metricsDisplay": {
+    "modelPerformance": "Model Performance",
+    "overallAccuracy": "Overall accuracy metrics",
+    "errorAnalysis": "Error Analysis", 
+    "predictionAccuracy": "Prediction accuracy",
+    "trainingData": "Training Data",
+    "datasetInfo": "Dataset information",
+    "configuration": "Configuration",
+    "modelCountrySettings": "Model and country settings",
+    "performance": "Performance",
+    "trainingSamples": "Training Samples",
+    "testSamples": "Test Samples",
+    "featuresUsed": "Features Used",
+    "country": "Country",
+    "modelType": "Model Type",
+    "features": "Features",
+    "more": "more",
+    "lowerBetter": "Lower values indicate better accuracy",
+    "performanceLevels": {
+      "excellent": "Excellent",
+      "good": "Good",
+      "fair": "Fair",
+      "poor": "Poor"
+    }
   },
   "horizon": {
     "title": "Prediction Horizon",
@@ -129,5 +181,9 @@
       "tomorrow": "Tomorrow",
       "yesterday": "Yesterday"
     }
+  },
+  "welcome": {
+    "title": "Ready to Predict",
+    "message": "Configure your parameters on the left and click \"Generate Prediction\" to see advanced ML-powered COVID-19 forecasts."
   }
 }

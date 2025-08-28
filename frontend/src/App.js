@@ -70,7 +70,12 @@ const App = () => {
     setCurrentStep(0);
 
     // Simulate analysis steps
-    const steps = ['Fetching data', 'Processing features', 'Training model', 'Generating predictions'];
+    const steps = [
+      t('processingSteps.fetchingData'), 
+      t('processingSteps.processingFeatures'), 
+      t('processingSteps.trainingModel'), 
+      t('processingSteps.generatingPredictions')
+    ];
 
     for (let i = 0; i < steps.length; i++) {
       setCurrentStep(i);
@@ -286,7 +291,7 @@ const App = () => {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                       >
-                        Reset & New Prediction
+{t('buttons.retry')}
                       </motion.button>
                     )}
                   </form>
@@ -304,7 +309,7 @@ const App = () => {
                       exit={{ opacity: 0, scale: 0.9 }}
                       className="card-primary text-center"
                     >
-                      <LoadingSpinner size="xl" text="Analyzing data" />
+                      <LoadingSpinner size="xl" text={t('loadingSpinner.preparing')} />
 
                       {isAnalyzing && (
                         <motion.div
@@ -344,7 +349,7 @@ const App = () => {
                     >
                       <div className="text-center">
                         <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-                        <h3 className="text-xl font-bold text-red-400 mb-2">Prediction Failed</h3>
+                        <h3 className="text-xl font-bold text-red-400 mb-2">{t('errors.generic')}</h3>
                         <p className="text-white/70">{error}</p>
                         <motion.button
                           className="button-primary mt-6"
@@ -352,7 +357,7 @@ const App = () => {
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                         >
-                          Try Again
+{t('buttons.retry')}
                         </motion.button>
                       </div>
                     </motion.div>
@@ -392,10 +397,9 @@ const App = () => {
                     >
                       <div className="py-12">
                         <Target className="w-20 h-20 text-white/40 mx-auto mb-6" />
-                        <h3 className="text-2xl font-bold text-white mb-4">Ready to Predict</h3>
+                        <h3 className="text-2xl font-bold text-white mb-4">{t('welcome.title')}</h3>
                         <p className="text-white/70 max-w-md mx-auto leading-relaxed">
-                          Configure your parameters on the left and click "Generate Prediction"
-                          to see advanced ML-powered COVID-19 forecasts.
+                          {t('welcome.message')}
                         </p>
                       </div>
                     </motion.div>

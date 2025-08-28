@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Wifi, WifiOff, X, AlertTriangle } from 'lucide-react';
+import { WifiOff, X, AlertTriangle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { config } from '../config/environments';
 
 const OfflineNotice = () => {
   const [isOffline, setIsOffline] = useState(false);
   const [showNotice, setShowNotice] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     // Check if backend is available
@@ -92,7 +94,7 @@ const OfflineNotice = () => {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1">
                   <h3 className="text-sm font-semibold text-orange-400">
-                    Demo Mode Active
+                    {t('offlineNotice.title')}
                   </h3>
                   <button
                     onClick={handleDismiss}
@@ -103,12 +105,12 @@ const OfflineNotice = () => {
                 </div>
                 
                 <p className="text-sm text-white/80 mb-3">
-                  Backend server is not running. Using demo data for visualization.
+                  {t('offlineNotice.message')}
                 </p>
                 
                 <div className="flex items-center space-x-2 text-xs text-white/60">
                   <AlertTriangle className="w-3 h-3" />
-                  <span>Predictions are simulated</span>
+                  <span>{t('offlineNotice.warning')}</span>
                 </div>
               </div>
             </div>

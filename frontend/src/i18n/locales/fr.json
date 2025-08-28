@@ -12,22 +12,35 @@
     "title": "Sélectionnez un Pays",
     "subtitle": "Choisissez un pays pour les prédictions COVID-19",
     "searchPlaceholder": "Rechercher un pays...",
-    "noResults": "Aucun pays trouvé",
-    "featuredCountries": "Pays en Vedette",
+    "noResults": "Aucun pays trouvé correspondant à",
+    "featuredCountries": "Pays en Vedette", 
     "otherCountries": "Autres Pays",
     "specialConfig": "Configuration Spéciale",
-    "totalCountries": "pays disponibles"
+    "totalCountries": "pays disponibles",
+    "selectCountry": "Sélectionnez un pays",
+    "optimized": "Optimisé"
   },
   "modelSelector": {
     "title": "Choisissez un Modèle ML",
     "subtitle": "Sélectionnez l'algorithme d'apprentissage automatique",
     "recommended": "Recommandé",
     "complexity": "Complexité",
-    "accuracy": "Précision",
+    "accuracy": "Précision", 
     "speed": "Vitesse",
+    "selectModel": "Sélectionnez un modèle",
+    "bestFor": "Idéal pour",
+    "recommendedFor": "est recommandé pour",
+    "levels": {
+      "low": "Faible",
+      "medium": "Moyen",
+      "high": "Élevé",
+      "veryHigh": "Très Élevé",
+      "fast": "Rapide",
+      "slow": "Lent"
+    },
     "models": {
       "linear": {
-        "name": "Régression Linéaire",
+        "name": "Régression Linéaire", 
         "description": "Simple, rapide et interprétable",
         "bestFor": "Idéal pour les données limitées et les tendances linéaires"
       },
@@ -49,10 +62,18 @@
     "loading": "Génération des prédictions...",
     "error": "Erreur lors de la génération des prédictions",
     "retry": "Réessayer",
+    "noData": "Aucune donnée de prédiction disponible",
+    "predictedCases": "Cas Prédits",
+    "confidenceRange": "Plage de Confiance",
+    "range": "Plage",
+    "minimum": "Minimum",
+    "maximum": "Maximum", 
+    "average": "Moyenne",
+    "total": "Total",
     "metrics": {
       "title": "Métriques du Modèle",
       "rmse": "RMSE",
-      "mae": "MAE",
+      "mae": "MAE", 
       "r2Score": "Score R²",
       "trainingSamples": "Échantillons d'Entraînement",
       "testSamples": "Échantillons de Test"
@@ -74,6 +95,37 @@
     "preparing": "Préparation des données...",
     "training": "Entraînement du modèle...",
     "predicting": "Génération des prédictions..."
+  },
+  "processingSteps": {
+    "fetchingData": "Récupération des données",
+    "processingFeatures": "Traitement des fonctionnalités", 
+    "trainingModel": "Entraînement du modèle",
+    "generatingPredictions": "Génération des prédictions"
+  },
+  "metricsDisplay": {
+    "modelPerformance": "Performance du Modèle",
+    "overallAccuracy": "Métriques de précision globale",
+    "errorAnalysis": "Analyse d'Erreur",
+    "predictionAccuracy": "Précision des prédictions",
+    "trainingData": "Données d'Entraînement",
+    "datasetInfo": "Informations sur le dataset",
+    "configuration": "Configuration",
+    "modelCountrySettings": "Paramètres du modèle et du pays",
+    "performance": "Performance",
+    "trainingSamples": "Échantillons d'Entraînement",
+    "testSamples": "Échantillons de Test",
+    "featuresUsed": "Fonctionnalités Utilisées",
+    "country": "Pays",
+    "modelType": "Type de Modèle",
+    "features": "Fonctionnalités",
+    "more": "plus",
+    "lowerBetter": "Les valeurs inférieures indiquent une meilleure précision",
+    "performanceLevels": {
+      "excellent": "Excellent",
+      "good": "Bon",
+      "fair": "Correct",
+      "poor": "Mauvais"
+    }
   },
   "horizon": {
     "title": "Horizon de Prédiction",
@@ -121,7 +173,7 @@
   "formatting": {
     "numbers": {
       "thousand": "k",
-      "million": "M",
+      "million": "M", 
       "billion": "G"
     },
     "dates": {
@@ -129,5 +181,9 @@
       "tomorrow": "Demain",
       "yesterday": "Hier"
     }
+  },
+  "welcome": {
+    "title": "Prêt à Prédire",
+    "message": "Configurez vos paramètres à gauche et cliquez sur \"Prédire\" pour voir des prévisions COVID-19 avancées alimentées par ML."
   }
 }

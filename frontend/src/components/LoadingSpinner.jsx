@@ -1,7 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
-const LoadingSpinner = ({ size = 'md', text = 'Loading...' }) => {
+const LoadingSpinner = ({ size = 'md', text }) => {
+  const { t } = useTranslation();
+  const displayText = text || t('loadingSpinner.loading');
   const sizeClasses = {
     sm: 'w-6 h-6',
     md: 'w-12 h-12',
@@ -47,7 +50,7 @@ const LoadingSpinner = ({ size = 'md', text = 'Loading...' }) => {
 
       {/* Text with animated dots */}
       <div className="flex items-center space-x-1 text-white/80 font-medium">
-        <span>{text}</span>
+        <span>{displayText}</span>
         <div className="flex space-x-1">
           {[0, 1, 2].map((i) => (
             <motion.div
