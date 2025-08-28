@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 
-const API_BASE_URL = 'http://localhost:5001';
+const API_BASE_URL = 'http://localhost:5000';
 
 // Fallback data when backend is not available
 const FALLBACK_DATA = {
@@ -89,6 +89,7 @@ export const useApi = () => {
       country,
       model,
       horizon: horizon.toString(),
+      data_path: 'owid-covid-data-sample.csv',
     });
     
     try {

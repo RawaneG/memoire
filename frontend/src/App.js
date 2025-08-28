@@ -174,7 +174,7 @@ const App = () => {
         </motion.header>
 
         {/* Main Content */}
-        <main className="relative">
+        <main className="relative mt-8">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
 
             {/* Prediction Form */}
@@ -236,8 +236,8 @@ const App = () => {
                             key={days}
                             type="button"
                             className={`p-3 rounded-xl border-2 transition-all duration-300 font-medium ${horizon === days
-                                ? 'border-primary-400 bg-primary-500/20 text-primary-300'
-                                : 'border-white/20 text-white/70 hover:border-white/40 hover:text-white'
+                              ? 'border-primary-400 bg-primary-500/20 text-white'
+                              : 'border-white/20 text-white/70 hover:border-white/40 hover:text-white'
                               }`}
                             onClick={() => setHorizon(days)}
                             whileHover={{ scale: 1.02 }}
@@ -288,7 +288,7 @@ const App = () => {
               {/* Results Panel */}
               <motion.div variants={itemVariants} className="lg:col-span-2">
                 <AnimatePresence mode="wait">
-                  {(loading || isAnalyzing) && (
+                  {(loading || isAnalyzing) ? (
                     <motion.div
                       key="loading"
                       initial={{ opacity: 0, scale: 0.9 }}
@@ -326,9 +326,7 @@ const App = () => {
                         </motion.div>
                       )}
                     </motion.div>
-                  )}
-
-                  {error && (
+                  ) : error ? (
                     <motion.div
                       key="error"
                       initial={{ opacity: 0, scale: 0.9 }}
@@ -350,9 +348,7 @@ const App = () => {
                         </motion.button>
                       </div>
                     </motion.div>
-                  )}
-
-                  {predictions && !loading && !error && (
+                  ) : predictions ? (
                     <motion.div
                       key="results"
                       initial={{ opacity: 0, scale: 0.9 }}
@@ -378,13 +374,12 @@ const App = () => {
                         <PredictionChart predictions={predictions} />
                       </div>
                     </motion.div>
-                  )}
-
-                  {!predictions && !loading && !error && (
+                  ) : (
                     <motion.div
                       key="welcome"
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
                       className="card-primary text-center"
                     >
                       <div className="py-12">
