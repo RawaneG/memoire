@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Zap, Star, Info, TrendingUp } from 'lucide-react';
 
-const ModelSelector = ({ value, onChange, country }) => {
+const ModelSelector = ({ value, onChange, country, onToggle, shouldClose }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+  const buttonRef = useRef(null);
   const [models, setModels] = useState({
     available_models: {
       linear: {
@@ -86,6 +88,47 @@ const ModelSelector = ({ value, onChange, country }) => {
     setIsOpen(false);
   };
 
+  const handleToggle = () => {
+    const newIsOpen = !isOpen;
+    setIsOpen(newIsOpen);
+    if (newIsOpen && onToggle) {
+      onToggle('model');
+    }
+  };
+
+  // Close dropdown when shouldClose prop changes
+  useEffect(() => {
+    if (shouldClose && isOpen) {
+      setIsOpen(false);
+    }
+  }, [shouldClose, isOpen]);
+
+  // Handle outside clicks and keyboard navigation
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target) && 
+          buttonRef.current && !buttonRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape' && isOpen) {
+        setIsOpen(false);
+        buttonRef.current?.focus();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+        document.removeEventListener('keydown', handleKeyDown);
+      };
+    }
+  }, [isOpen]);
+
   const dropdownVariants = {
     hidden: { 
       opacity: 0, 
@@ -117,9 +160,19 @@ const ModelSelector = ({ value, onChange, country }) => {
   return (
     <div className="relative">
       <motion.button
+        ref={buttonRef}
         type="button"
-        className="w-full flex items-center justify-between px-6 py-4 bg-white/10 backdrop-blur-sm border border-white/30 rounded-2xl text-white font-medium transition-all duration-300 hover:bg-white/20 hover:border-primary-400 focus:outline-none focus:border-primary-400 focus:bg-white/20"
-        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between px-6 py-4 bg-white/10 backdrop-blur-sm border border-white/30 rounded-2xl text-white font-medium transition-all duration-300 hover:bg-white/20 hover:border-primary-400 focus:outline-none focus:border-primary-400 focus:bg-white/20 focus:ring-2 focus:ring-primary-500/50"
+        onClick={handleToggle}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleToggle();
+          }
+        }}
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
+        aria-label="Select ML model"
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
       >
@@ -146,13 +199,22 @@ const ModelSelector = ({ value, onChange, country }) => {
       <AnimatePresence>
         {isOpen && (
           <motion.div
+            ref={dropdownRef}
             variants={dropdownVariants}
             initial="hidden"
             animate="visible"
             exit="hidden"
-            className="absolute z-50 w-full mt-2 glass-morphism rounded-2xl border border-white/30 shadow-2xl overflow-hidden"
+            className="absolute z-[90] w-full mt-2 glass-morphism-dropdown rounded-2xl shadow-2xl overflow-hidden"
+            style={{
+              background: 'rgba(15, 15, 25, 0.95)',
+              backdropFilter: 'blur(20px) saturate(180%)',
+              border: '1px solid rgba(255, 255, 255, 0.15)'
+            }}
+            role="listbox"
+            aria-label="ML model options"
+            onClick={(e) => e.stopPropagation()}
           >
-            <div className="p-4 space-y-3">
+            <div className="p-4 space-y-3 max-h-[28rem] overflow-y-auto custom-scrollbar">
               {Object.entries(models.available_models).map(([key, model], index) => {
                 const ModelIcon = getModelIcon(key);
                 const isRecommended = key === recommendedModel;

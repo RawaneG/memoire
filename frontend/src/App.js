@@ -33,6 +33,7 @@ const App = () => {
   const [predictions, setPredictions] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
+  const [activeDropdown, setActiveDropdown] = useState(null);
   
   const { loading, error, predict, clearError } = useApi();
 
@@ -88,6 +89,41 @@ const App = () => {
     setPredictions(null);
     clearError();
   };
+
+  const handleDropdownToggle = (dropdownType) => {
+    // If the same dropdown is clicked, toggle it
+    if (activeDropdown === dropdownType) {
+      setActiveDropdown(null);
+    } else {
+      // Close any other dropdown and open this one
+      setActiveDropdown(dropdownType);
+    }
+  };
+
+  const shouldCloseDropdown = (dropdownType) => {
+    return activeDropdown !== null && activeDropdown !== dropdownType;
+  };
+
+  // Close dropdowns when clicking outside the form
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setActiveDropdown(null);
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setActiveDropdown(null);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -158,14 +194,19 @@ const App = () => {
                     <h2 className="text-2xl font-bold text-white">Configuration</h2>
                   </div>
 
-                  <form onSubmit={handleSubmit} className="space-y-6">
+                  <form onSubmit={handleSubmit} className="space-y-6" onClick={(e) => e.stopPropagation()}>
                     {/* Country Selection */}
                     <div>
                       <label className="block text-sm font-semibold text-white/80 mb-3">
                         <Globe className="w-4 h-4 inline mr-2" />
                         Country
                       </label>
-                      <CountrySelector value={country} onChange={setCountry} />
+                      <CountrySelector 
+                        value={country} 
+                        onChange={setCountry}
+                        onToggle={handleDropdownToggle}
+                        shouldClose={shouldCloseDropdown('country')}
+                      />
                     </div>
 
                     {/* Model Selection */}
@@ -174,7 +215,13 @@ const App = () => {
                         <Zap className="w-4 h-4 inline mr-2" />
                         ML Model
                       </label>
-                      <ModelSelector value={model} onChange={setModel} country={country} />
+                      <ModelSelector 
+                        value={model} 
+                        onChange={setModel} 
+                        country={country}
+                        onToggle={handleDropdownToggle}
+                        shouldClose={shouldCloseDropdown('model')}
+                      />
                     </div>
 
                     {/* Horizon Selection */}
