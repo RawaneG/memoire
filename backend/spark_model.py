@@ -9,23 +9,87 @@ from typing import Dict, List, Optional, Tuple
 
 # Configuration pour pays spécifiques avec leurs caractéristiques
 COUNTRY_CONFIGS = {
+    # 5 Pays Africains
     'Senegal': {
+        'continent': 'Africa',
         'population_density_threshold': 83,  # habitants/km²
         'gdp_per_capita_range': (1000, 2000),  # USD
         'vaccination_lag': 30,  # jours de retard typique
-        'seasonal_factor': True  # prendre en compte la saisonnalité
+        'seasonal_factor': True,  # prendre en compte la saisonnalité
+        'recommended_model': 'random_forest'
     },
+    'Nigeria': {
+        'continent': 'Africa',
+        'population_density_threshold': 226,
+        'gdp_per_capita_range': (2000, 3000),
+        'vaccination_lag': 45,
+        'seasonal_factor': True,
+        'recommended_model': 'random_forest'
+    },
+    'South Africa': {
+        'continent': 'Africa',
+        'population_density_threshold': 49,
+        'gdp_per_capita_range': (6000, 7000),
+        'vaccination_lag': 20,
+        'seasonal_factor': True,
+        'recommended_model': 'gradient_boost'
+    },
+    'Kenya': {
+        'continent': 'Africa',
+        'population_density_threshold': 94,
+        'gdp_per_capita_range': (1800, 2500),
+        'vaccination_lag': 35,
+        'seasonal_factor': True,
+        'recommended_model': 'random_forest'
+    },
+    'Morocco': {
+        'continent': 'Africa',
+        'population_density_threshold': 82,
+        'gdp_per_capita_range': (3000, 4000),
+        'vaccination_lag': 25,
+        'seasonal_factor': True,
+        'recommended_model': 'gradient_boost'
+    },
+    # 5 Autres Pays (Europe et Amérique du Nord)
     'France': {
+        'continent': 'Europe',
         'population_density_threshold': 119,
         'gdp_per_capita_range': (35000, 45000),
         'vaccination_lag': 7,
-        'seasonal_factor': True
+        'seasonal_factor': True,
+        'recommended_model': 'gradient_boost'
     },
     'Germany': {
+        'continent': 'Europe',
         'population_density_threshold': 240,
         'gdp_per_capita_range': (45000, 55000),
         'vaccination_lag': 5,
-        'seasonal_factor': True
+        'seasonal_factor': True,
+        'recommended_model': 'gradient_boost'
+    },
+    'United Kingdom': {
+        'continent': 'Europe',
+        'population_density_threshold': 281,
+        'gdp_per_capita_range': (40000, 50000),
+        'vaccination_lag': 5,
+        'seasonal_factor': True,
+        'recommended_model': 'gradient_boost'
+    },
+    'United States': {
+        'continent': 'North America',
+        'population_density_threshold': 36,
+        'gdp_per_capita_range': (55000, 65000),
+        'vaccination_lag': 7,
+        'seasonal_factor': True,
+        'recommended_model': 'gradient_boost'
+    },
+    'Canada': {
+        'continent': 'North America',
+        'population_density_threshold': 4,
+        'gdp_per_capita_range': (45000, 55000),
+        'vaccination_lag': 10,
+        'seasonal_factor': True,
+        'recommended_model': 'gradient_boost'
     }
 }
 
@@ -115,12 +179,14 @@ def predict_cases(country: str, model_type: str = 'linear', horizon: int = 14,
         # Créer des variables de décalage améliorées
         window_spec = Window.orderBy("date")
         
-        # Remplacer les valeurs nulles par des moyennes
+        # Remplacer les valeurs nulles par des moyennes ou zéros
         df_clean = df_country.fillna({
             'new_cases': 0,
             'new_deaths': 0,
             'new_vaccinations': 0,
-            'stringency_index': 0
+            'stringency_index': 0,
+            'total_cases': 0,
+            'total_deaths': 0
         })
         
         # Variables de décalage multiples pour capturer les tendances
@@ -151,7 +217,17 @@ def predict_cases(country: str, model_type: str = 'linear', horizon: int = 14,
         if "seasonal_sin" in df_lag.columns:
             feature_cols.extend(["seasonal_sin", "seasonal_cos"])
             
-        df_lag = df_lag.dropna()
+        # Remplacer les valeurs nulles restantes dans les features de décalage par 0
+        for col_name in feature_cols:
+            if col_name in df_lag.columns:
+                df_lag = df_lag.fillna({col_name: 0})
+        
+        # Ne supprimer les lignes que si toutes les features sont nulles
+        df_lag = df_lag.dropna(subset=feature_cols, how='all')
+        
+        # Vérifier que nous avons encore des données après le preprocessing
+        if df_lag.count() < 20:
+            raise ValueError(f"Données insuffisantes pour {country} après preprocessing. Seulement {df_lag.count()} lignes disponibles.")
 
         # Assembler les features disponibles
         assembler = VectorAssembler(
@@ -267,3 +343,56 @@ def predict_cases(country: str, model_type: str = 'linear', horizon: int = 14,
         raise
     finally:
         spark.stop()
+
+def get_configured_countries() -> List[str]:
+    """Retourne la liste des pays configurés pour les prédictions optimisées."""
+    return list(COUNTRY_CONFIGS.keys())
+
+def predict_all_configured_countries(model_type: str = 'linear', horizon: int = 14, 
+                                   data_path: str = "owid-covid-data-sample.csv") -> Dict:
+    """Génère des prédictions pour tous les pays configurés.
+    
+    Args:
+        model_type: Type de modèle ('linear', 'random_forest', 'gradient_boost')
+        horizon: Nombre de jours à prédire
+        data_path: Chemin vers le fichier de données OWID
+        
+    Returns:
+        Dict contenant les prédictions pour tous les pays configurés
+    """
+    results = {
+        'summary': {
+            'total_countries': len(COUNTRY_CONFIGS),
+            'african_countries': len([c for c in COUNTRY_CONFIGS.values() if c['continent'] == 'Africa']),
+            'other_countries': len([c for c in COUNTRY_CONFIGS.values() if c['continent'] != 'Africa']),
+            'model_used': model_type,
+            'horizon_days': horizon
+        },
+        'predictions_by_country': {},
+        'failed_countries': []
+    }
+    
+    for country in COUNTRY_CONFIGS.keys():
+        try:
+            logging.info(f"Génération des prédictions pour {country}...")
+            
+            # Utiliser le modèle recommandé pour ce pays si aucun modèle spécifié
+            recommended_model = COUNTRY_CONFIGS[country].get('recommended_model', model_type)
+            
+            prediction = predict_cases(
+                country=country,
+                model_type=recommended_model,
+                horizon=horizon,
+                data_path=data_path
+            )
+            
+            results['predictions_by_country'][country] = prediction
+            
+        except Exception as e:
+            logging.error(f"Échec de prédiction pour {country}: {str(e)}")
+            results['failed_countries'].append({
+                'country': country,
+                'error': str(e)
+            })
+    
+    return results
