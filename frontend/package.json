@@ -3,19 +3,23 @@
   "version": "2.0.0",
   "private": true,
   "dependencies": {
+    "clsx": "^2.0.0",
+    "framer-motion": "^10.16.16",
+    "i18next": "^25.4.2",
+    "i18next-browser-languagedetector": "^8.2.0",
+    "i18next-http-backend": "^3.0.2",
+    "lucide-react": "^0.294.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-i18next": "^15.7.3",
     "react-scripts": "5.0.1",
-    "framer-motion": "^10.16.16",
-    "recharts": "^2.8.0",
-    "lucide-react": "^0.294.0",
-    "clsx": "^2.0.0"
+    "recharts": "^2.8.0"
   },
   "devDependencies": {
-    "tailwindcss": "^3.3.6",
     "@tailwindcss/forms": "^0.5.7",
     "autoprefixer": "^10.4.16",
-    "postcss": "^8.4.32"
+    "postcss": "^8.4.32",
+    "tailwindcss": "^3.3.6"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -24,10 +28,21 @@
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
-    "extends": ["react-app", "react-app/jest"]
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
   },
   "browserslist": {
-    "production": [">0.2%", "not dead", "not op_mini all"],
-    "development": ["last 1 chrome version", "last 1 firefox version", "last 1 safari version"]
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }

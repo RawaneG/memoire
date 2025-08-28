@@ -15,6 +15,8 @@ OWID Predictor combine des visualisations de données interactives avec des mod�
 - ⚡ **Performance Optimisée** - Apache Spark pour le traitement des données à grande échelle
 - 🌟 **Données Réelles OWID** - Plus de 429,000 enregistrements avec 67 variables
 - 🎯 **Prédictions Spécialisées** - Modèles recommandés par pays et continent
+- 🌐 **Internationalisation** - Support complet français/anglais avec détection automatique
+- 🔄 **Mode Hors-ligne** - Données de fallback et prédictions simulées
 
 ---
 
@@ -32,6 +34,31 @@ OWID Predictor combine des visualisations de données interactives avec des mod�
 
 - Python 3.8+
 - pip gestionnaire de paquets
+
+### ⚙️ Configuration des Environnements
+
+Le projet utilise un module de configuration centralisé pour gérer les URLs d'API selon l'environnement :
+
+**Fichier:** `frontend/src/config/environments.js`
+
+```javascript
+const environments = {
+  development: {
+    API_BASE_URL: 'http://localhost:5000',
+  },
+  production: {
+    API_BASE_URL: 'https://your-production-api.com',
+  },
+  staging: {
+    API_BASE_URL: 'https://your-staging-api.com',
+  }
+};
+```
+
+**Avantages:**
+- ✅ Configuration centralisée des URLs d'API
+- ✅ Basculement automatique selon `NODE_ENV`
+- ✅ Pas besoin de modifier le code pour changer d'environnement
 
 ### ⚡ Installation Rapide
 
@@ -53,10 +80,10 @@ python -m venv venv
 
 # Activer l'environnement virtuel
 
-# Windows (Command Prompt):
-venv\Scripts\activate
-# Mac/Linux:
-source venv/bin/activate
+  # Windows (Command Prompt Terminal):
+  venv\Scripts\activate
+  # Mac/Linux:
+  source venv/bin/activate
 
 # Installer les dépendances (y compris Apache Spark)
 pip install -r requirements.txt
@@ -104,13 +131,24 @@ OWID/
 │   │   │   ├── CountrySelector.jsx
 │   │   │   ├── ModelSelector.jsx
 │   │   │   ├── PredictionChart.jsx
+│   │   │   ├── OfflineNotice.jsx
+│   │   │   ├── LanguageSwitcher.jsx
+│   │   │   ├── BackgroundElements.jsx
+│   │   │   ├── LoadingSpinner.jsx
+│   │   │   ├── MetricsDisplay.jsx
 │   │   │   └── ...
+│   │   ├── config/             # Configuration et environnements
+│   │   │   └── environments.js # Configuration API par environnement
 │   │   ├── hooks/              # Hooks personnalisés
-│   │   │   └── useApi.js
+│   │   │   └── useApi.js       # Hook API avec fallback offline
+│   │   ├── i18n.js             # Configuration internationalisation
 │   │   ├── App.js              # Composant racine
 │   │   ├── index.css           # Styles globaux
 │   │   └── index.js            # Point d'entrée
 │   ├── public/
+│   │   └── locales/            # Fichiers de traduction
+│   │       ├── en/             # Traductions anglaises
+│   │       └── fr/             # Traductions françaises
 │   ├── package.json
 │   └── tailwind.config.js      # Configuration Tailwind
 └── README.md                   # Ce fichier
@@ -127,18 +165,21 @@ OWID/
 | **Tailwind CSS**  | 3.3.6    | Framework CSS utilitaire  |
 | **Recharts**      | 2.8.0    | Visualisation de données  |
 | **Lucide React**  | 0.294.0  | Bibliothèque d'icônes     |
+| **i18next**       | 25.4.2   | Internationalisation      |
+| **react-i18next** | 15.7.3   | Intégration React i18n    |
+| **clsx**          | 2.0.0    | Gestion classes CSS conditionnelles |
 
 #### Backend
 
-| Technologie       | Usage                               |
-| ----------------- | ----------------------------------- |
-| **Flask**         | Framework web Python                |
-| **Apache Spark**  | Traitement de données à grande échelle |
-| **PySpark ML**    | Modèles d'apprentissage automatique |
-| **scikit-learn**  | Modèles ML (version simplifiée)     |
-| **pandas**        | Manipulation de données             |
-| **numpy**         | Calculs numériques                  |
-| **CORS**          | Support cross-origin                |
+| Technologie      | Usage                                  |
+| ---------------- | -------------------------------------- |
+| **Flask**        | Framework web Python                   |
+| **Apache Spark** | Traitement de données à grande échelle |
+| **PySpark ML**   | Modèles d'apprentissage automatique    |
+| **scikit-learn** | Modèles ML (version simplifiée)        |
+| **pandas**       | Manipulation de données                |
+| **numpy**        | Calculs numériques                     |
+| **CORS**         | Support cross-origin                   |
 
 ---
 
@@ -147,13 +188,15 @@ OWID/
 ### 🌍 1. Sélection du Pays
 
 #### **Pays Africains Configurés** (5)
+
 - 🇸🇳 **Sénégal** - Modèle recommandé: Forêt Aléatoire
-- 🇳🇬 **Nigeria** - Modèle recommandé: Forêt Aléatoire  
+- 🇳🇬 **Nigeria** - Modèle recommandé: Forêt Aléatoire
 - 🇿🇦 **Afrique du Sud** - Modèle recommandé: Gradient Boosting
 - 🇰🇪 **Kenya** - Modèle recommandé: Forêt Aléatoire
 - 🇲🇦 **Maroc** - Modèle recommandé: Gradient Boosting
 
 #### **Pays Développés Configurés** (5)
+
 - 🇫🇷 **France** - Modèle recommandé: Gradient Boosting
 - 🇩🇪 **Allemagne** - Modèle recommandé: Gradient Boosting
 - 🇬🇧 **Royaume-Uni** - Modèle recommandé: Gradient Boosting
@@ -161,6 +204,7 @@ OWID/
 - 🇨🇦 **Canada** - Modèle recommandé: Gradient Boosting
 
 **Fonctionnalités:**
+
 - **Recherche en temps réel**: Tapez pour filtrer la liste des pays
 - **Badge Spécial**: Pays configurés affichent des optimisations spécifiques
 - **Plus de 255 pays disponibles** dans la base de données OWID
@@ -223,11 +267,7 @@ GET /health
   "status": "healthy",
   "service": "OWID COVID-19 Prediction API",
   "version": "2.0",
-  "features": [
-    "multi-model",
-    "country-specific", 
-    "senegal-optimized"
-  ]
+  "features": ["multi-model", "country-specific", "senegal-optimized"]
 }
 ```
 
@@ -282,7 +322,7 @@ GET /models
   },
   "recommended_by_country": {
     "Senegal": "random_forest",
-    "Nigeria": "random_forest", 
+    "Nigeria": "random_forest",
     "Kenya": "random_forest",
     "South Africa": "gradient_boost",
     "Morocco": "gradient_boost",
@@ -307,7 +347,7 @@ GET /predict?country=Senegal&model=random_forest&horizon=14
 GET /predict_all?model=linear&horizon=7
 ```
 
-Génère des prédictions pour tous les 10 pays configurés en une seule requête.
+Génère des prédictions pour tous les 10 pays configurés en une seule requête avec leurs modèles recommandés.
 
 **Paramètres:**
 
@@ -326,8 +366,16 @@ Génère des prédictions pour tous les 10 pays configurés en une seule requêt
   "training_samples": 1339,
   "test_samples": 335,
   "features_used": [
-    "cases_lag_1", "cases_lag_7", "deaths_lag_1", 
-    "vaccinations_lag_7", "seasonal_sin", "seasonal_cos"
+    "cases_lag_1",
+    "cases_lag_3",
+    "cases_lag_7",
+    "cases_lag_14",
+    "deaths_lag_1",
+    "deaths_lag_7",
+    "vaccinations_lag_7",
+    "stringency_lag_1",
+    "seasonal_sin",
+    "seasonal_cos"
   ],
   "metrics": {
     "rmse": 17.5,
@@ -342,8 +390,16 @@ Génère des prédictions pour tous les 10 pays configurés en une seule requêt
   ],
   "country_config": {
     "continent": "Africa",
-    "recommended_model": "random_forest",
-    "vaccination_lag": 30
+    "population_density_threshold": 83,
+    "gdp_per_capita_range": [1000, 2000],
+    "vaccination_lag": 30,
+    "seasonal_factor": true,
+    "recommended_model": "random_forest"
+  },
+  "model_info": {
+    "name": "Forêt Aléatoire",
+    "description": "Modèle ensembliste robuste aux valeurs aberrantes",
+    "best_for": ["données complexes", "relations non-linéaires"]
   }
 }
 ```
@@ -469,6 +525,15 @@ npm test -- --coverage
 npm test -- --watch
 ```
 
+### 🌐 Tests Internationalisation
+
+```bash
+# Tester les traductions
+# Vérifier les fichiers dans public/locales/
+# Basculer entre FR/EN via l'interface
+# Tester la détection automatique de langue
+```
+
 ### 🔍 Tests API Backend
 
 ```bash
@@ -477,6 +542,9 @@ curl "http://localhost:5000/health"
 curl "http://localhost:5000/countries"
 curl "http://localhost:5000/predict?country=Senegal&model=random_forest&horizon=7"
 curl "http://localhost:5000/predict_all?model=linear&horizon=7"
+
+# Test avec données de fallback (serveur éteint)
+# L'application doit fonctionner en mode offline
 ```
 
 ### 📊 Métriques de Performance
@@ -542,6 +610,16 @@ npm start
 
 ## 📞 Support et Contribution
 
+### 🆕 Nouvelles Fonctionnalités (Version 2.0)
+
+- ✨ **Internationalisation complète** - Interface en français et anglais
+- 🌐 **Détection automatique de langue** - Basée sur les préférences du navigateur
+- 🔄 **Mode hors-ligne robuste** - Données de fallback et prédictions simulées
+- 📊 **Métriques enrichies** - Plus de features pour les modèles ML
+- 🎨 **Interface améliorée** - Composants LanguageSwitcher et BackgroundElements
+- ⚡ **Gestion d'erreurs avancée** - Fallback gracieux et notifications utilisateur
+- 🔧 **Configuration par pays étendue** - 10 configurations spécialisées détaillées
+
 ### 🤝 Comment Contribuer
 
 1. **Fork** le projet
@@ -556,6 +634,10 @@ npm start
 - [Framer Motion](https://framer.com/motion)
 - [Tailwind CSS](https://tailwindcss.com/docs)
 - [Flask Documentation](https://flask.palletsprojects.com)
+- [Apache Spark PySpark](https://spark.apache.org/docs/latest/api/python/)
+- [i18next Documentation](https://www.i18next.com/)
+- [React i18next](https://react.i18next.com/)
+- [Our World in Data](https://ourworldindata.org/coronavirus)
 
 ### 🐞 Signaler un Bug
 
@@ -575,6 +657,10 @@ Développé avec ❤️ pour la prédiction intelligente des cas COVID-19, avec 
 
 **Technologies clés:** React • Flask • Apache Spark • Framer Motion • Tailwind CSS • PySpark ML • Recharts
 
-**Données:** Our World in Data (OWID) - Plus de 429,000 enregistrements COVID-19 avec 67 variables détaillées
+**Données:** Our World in Data (OWID) - Plus de 429,000+ enregistrements COVID-19 avec 67 variables détaillées
 
 **Optimisations régionales:** Modèles spécialisés par continent avec configurations adaptées aux caractéristiques épidémiologiques et socio-économiques de chaque région.
+
+**Langues supportées:** 🇫🇷 Français • 🇺🇸 English - Interface complètement internationalisée avec détection automatique
+
+**Architecture moderne:** Mode SPA React avec fallback offline, animations fluides Framer Motion, et backend Spark haute performance

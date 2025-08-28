@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
+import { config } from '../config/environments';
 
-const API_BASE_URL = 'http://localhost:5000';
+const API_BASE_URL = config.API_BASE_URL;
 
 // Fallback data when backend is not available
 const FALLBACK_DATA = {
@@ -53,22 +54,40 @@ export const useApi = () => {
     
     try {
       const url = `${API_BASE_URL}${endpoint}`;
+      
+      // Create AbortController for timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      
       const response = await fetch(url, {
         headers: {
           'Content-Type': 'application/json',
           ...options.headers,
         },
+        signal: controller.signal,
         ...options,
       });
+      
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         throw new Error(`API Error: ${response.status} ${response.statusText}`);
       }
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        console.warn(`JSON parsing failed: ${jsonError.message}. Response may be malformed.`);
+        throw new Error(`Invalid JSON response from server: ${jsonError.message}`);
+      }
       return data;
     } catch (err) {
-      console.warn(`API request failed: ${err.message}. Using fallback data.`);
+      if (err.name === 'AbortError') {
+        console.warn(`API request timed out for ${endpoint}. Using fallback data.`);
+      } else {
+        console.warn(`API request failed: ${err.message}. Using fallback data.`);
+      }
       
       // Return fallback data based on endpoint
       if (endpoint === '/countries') {
@@ -97,6 +116,7 @@ export const useApi = () => {
     } catch (err) {
       // Generate mock prediction data when backend is unavailable
       console.warn('Backend unavailable, generating mock prediction data');
+      console.error('Detailed error:', err);
       
       const mockPredictions = [];
       const baseValue = Math.floor(Math.random() * 1000) + 100;
