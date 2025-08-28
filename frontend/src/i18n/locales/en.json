@@ -1,0 +1,133 @@
+{
+  "app": {
+    "title": "OWID COVID-19 Predictor",
+    "subtitle": "AI-powered predictions with advanced machine learning models"
+  },
+  "navigation": {
+    "home": "Home",
+    "about": "About",
+    "help": "Help"
+  },
+  "countrySelector": {
+    "title": "Select Country",
+    "subtitle": "Choose a country for COVID-19 predictions",
+    "searchPlaceholder": "Search for a country...",
+    "noResults": "No countries found",
+    "featuredCountries": "Featured Countries",
+    "otherCountries": "Other Countries",
+    "specialConfig": "Special Configuration",
+    "totalCountries": "countries available"
+  },
+  "modelSelector": {
+    "title": "Choose ML Model",
+    "subtitle": "Select the machine learning algorithm",
+    "recommended": "Recommended",
+    "complexity": "Complexity",
+    "accuracy": "Accuracy",
+    "speed": "Speed",
+    "models": {
+      "linear": {
+        "name": "Linear Regression",
+        "description": "Simple, fast and interpretable",
+        "bestFor": "Best for limited data and linear trends"
+      },
+      "random_forest": {
+        "name": "Random Forest",
+        "description": "Robust ensemble model",
+        "bestFor": "Best for complex data and non-linear relationships"
+      },
+      "gradient_boost": {
+        "name": "Gradient Boosting",
+        "description": "Advanced high-precision model",
+        "bestFor": "Best for precise predictions and large datasets"
+      }
+    }
+  },
+  "predictionChart": {
+    "title": "COVID-19 Predictions",
+    "subtitle": "Predictions for the next {{days}} days",
+    "loading": "Generating predictions...",
+    "error": "Error generating predictions",
+    "retry": "Retry",
+    "metrics": {
+      "title": "Model Metrics",
+      "rmse": "RMSE",
+      "mae": "MAE",
+      "r2Score": "R² Score",
+      "trainingSamples": "Training Samples",
+      "testSamples": "Test Samples"
+    },
+    "chart": {
+      "cases": "Cases",
+      "date": "Date",
+      "prediction": "Prediction",
+      "confidence": "Confidence Interval"
+    }
+  },
+  "offlineNotice": {
+    "title": "Demo Mode Active",
+    "message": "Backend server is not running. Using demo data for visualization.",
+    "warning": "Predictions are simulated"
+  },
+  "loadingSpinner": {
+    "loading": "Loading...",
+    "preparing": "Preparing data...",
+    "training": "Training model...",
+    "predicting": "Generating predictions..."
+  },
+  "horizon": {
+    "title": "Prediction Horizon",
+    "subtitle": "Select the prediction period",
+    "days": "days",
+    "options": {
+      "7": "1 week",
+      "14": "2 weeks",
+      "21": "3 weeks",
+      "30": "1 month"
+    }
+  },
+  "buttons": {
+    "predict": "Predict",
+    "loading": "Loading...",
+    "retry": "Retry",
+    "close": "Close",
+    "dismiss": "Dismiss",
+    "select": "Select",
+    "clear": "Clear",
+    "export": "Export",
+    "download": "Download"
+  },
+  "errors": {
+    "generic": "An error occurred",
+    "networkError": "Network error",
+    "serverError": "Server error",
+    "dataNotFound": "Data not found",
+    "invalidInput": "Invalid input",
+    "tryAgain": "Please try again later"
+  },
+  "status": {
+    "healthy": "Service online",
+    "offline": "Service offline",
+    "connecting": "Connecting...",
+    "connected": "Connected",
+    "disconnected": "Disconnected"
+  },
+  "features": {
+    "realTimeData": "Real-time Data",
+    "multipleModels": "Multiple Models",
+    "countrySpecific": "Country Specific",
+    "confidenceIntervals": "Confidence Intervals"
+  },
+  "formatting": {
+    "numbers": {
+      "thousand": "k",
+      "million": "M",
+      "billion": "B"
+    },
+    "dates": {
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "yesterday": "Yesterday"
+    }
+  }
+}

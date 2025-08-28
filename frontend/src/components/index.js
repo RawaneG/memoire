@@ -6,3 +6,4 @@ export { default as ModelSelector } from './ModelSelector';
 export { default as PredictionChart } from './PredictionChart';
 export { default as MetricsDisplay } from './MetricsDisplay';
 export { default as OfflineNotice } from './OfflineNotice';
+export { default as LanguageSwitcher } from './LanguageSwitcher';
