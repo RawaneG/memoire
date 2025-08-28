@@ -208,99 +208,102 @@ const ModelSelector = ({ value, onChange, country, onToggle, shouldClose }) => {
             style={{
               background: 'rgba(15, 15, 25, 0.95)',
               backdropFilter: 'blur(20px) saturate(180%)',
-              border: '1px solid rgba(255, 255, 255, 0.15)'
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              maxHeight: '70vh'
             }}
             role="listbox"
             aria-label="ML model options"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="p-4 space-y-3 max-h-[28rem] overflow-y-auto custom-scrollbar">
-              {Object.entries(models.available_models).map(([key, model], index) => {
-                const ModelIcon = getModelIcon(key);
-                const isRecommended = key === recommendedModel;
-                const isSelected = key === value;
+            <div className="overflow-y-auto custom-scrollbar" style={{ maxHeight: 'calc(70vh - 1rem)' }}>
+              <div className="p-4 space-y-3">
+                {Object.entries(models.available_models).map(([key, model], index) => {
+                  const ModelIcon = getModelIcon(key);
+                  const isRecommended = key === recommendedModel;
+                  const isSelected = key === value;
 
-                return (
-                  <motion.button
-                    key={key}
-                    variants={itemVariants}
-                    initial="hidden"
-                    animate="visible"
-                    custom={index}
-                    className={`w-full p-4 text-left rounded-xl border-2 transition-all duration-300 group ${
-                      isSelected
-                        ? 'border-primary-400 bg-primary-500/20'
-                        : 'border-white/20 hover:border-white/40 hover:bg-white/10'
-                    }`}
-                    onClick={() => handleSelect(key)}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center space-x-3">
-                        <div className={`p-2 rounded-lg ${
-                          isSelected ? 'bg-primary-500' : 'bg-white/10'
-                        } transition-colors`}>
-                          <ModelIcon className={`w-5 h-5 ${
-                            isSelected ? 'text-white' : 'text-white/70'
-                          }`} />
+                  return (
+                    <motion.button
+                      key={key}
+                      variants={itemVariants}
+                      initial="hidden"
+                      animate="visible"
+                      custom={index}
+                      className={`w-full p-4 text-left rounded-xl border-2 transition-all duration-300 group ${
+                        isSelected
+                          ? 'border-primary-400 bg-primary-500/20'
+                          : 'border-white/20 hover:border-white/40 hover:bg-white/10'
+                      }`}
+                      onClick={() => handleSelect(key)}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center space-x-3">
+                          <div className={`p-2 rounded-lg ${
+                            isSelected ? 'bg-primary-500' : 'bg-white/10'
+                          } transition-colors`}>
+                            <ModelIcon className={`w-5 h-5 ${
+                              isSelected ? 'text-white' : 'text-white/70'
+                            }`} />
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-white">{model.name}</h4>
+                            <p className="text-sm text-white/70">{model.description}</p>
+                          </div>
                         </div>
-                        <div>
-                          <h4 className="font-semibold text-white">{model.name}</h4>
-                          <p className="text-sm text-white/70">{model.description}</p>
-                        </div>
+                        
+                        {isRecommended && (
+                          <div className="px-2 py-1 text-xs bg-green-500/20 text-green-400 rounded-full border border-green-500/30">
+                            Recommended
+                          </div>
+                        )}
                       </div>
-                      
-                      {isRecommended && (
-                        <div className="px-2 py-1 text-xs bg-green-500/20 text-green-400 rounded-full border border-green-500/30">
-                          Recommended
-                        </div>
-                      )}
-                    </div>
 
-                    {/* Model specs */}
-                    <div className="grid grid-cols-3 gap-3 text-xs">
-                      <div className="text-center">
-                        <div className="text-white/60 mb-1">Complexity</div>
-                        <div className={`px-2 py-1 rounded-full border text-xs font-medium ${getComplexityColor(model.complexity)}`}>
-                          {model.complexity}
+                      {/* Model specs */}
+                      <div className="grid grid-cols-3 gap-3 text-xs">
+                        <div className="text-center">
+                          <div className="text-white/60 mb-1">Complexity</div>
+                          <div className={`px-2 py-1 rounded-full border text-xs font-medium ${getComplexityColor(model.complexity)}`}>
+                            {model.complexity}
+                          </div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-white/60 mb-1">Accuracy</div>
+                          <div className={`font-medium ${getAccuracyColor(model.accuracy)}`}>
+                            {model.accuracy}
+                          </div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-white/60 mb-1">Speed</div>
+                          <div className="text-white font-medium">{model.speed}</div>
                         </div>
                       </div>
-                      <div className="text-center">
-                        <div className="text-white/60 mb-1">Accuracy</div>
-                        <div className={`font-medium ${getAccuracyColor(model.accuracy)}`}>
-                          {model.accuracy}
+
+                      {/* Best for */}
+                      <div className="mt-3 pt-3 border-t border-white/10">
+                        <div className="flex items-center space-x-2 text-xs text-white/60">
+                          <Info className="w-3 h-3" />
+                          <span>Best for: {model.best_for.join(', ')}</span>
                         </div>
                       </div>
-                      <div className="text-center">
-                        <div className="text-white/60 mb-1">Speed</div>
-                        <div className="text-white font-medium">{model.speed}</div>
-                      </div>
-                    </div>
-
-                    {/* Best for */}
-                    <div className="mt-3 pt-3 border-t border-white/10">
-                      <div className="flex items-center space-x-2 text-xs text-white/60">
-                        <Info className="w-3 h-3" />
-                        <span>Best for: {model.best_for.join(', ')}</span>
-                      </div>
-                    </div>
-                  </motion.button>
-                );
-              })}
-            </div>
-
-            {/* Country-specific recommendation */}
-            {country && recommendedModel && (
-              <div className="p-4 bg-white/5 border-t border-white/10">
-                <div className="flex items-center space-x-2 text-sm text-white/80">
-                  <Star className="w-4 h-4 text-yellow-400" />
-                  <span>
-                    <strong>{models.available_models[recommendedModel].name}</strong> is recommended for <strong>{country}</strong>
-                  </span>
-                </div>
+                    </motion.button>
+                  );
+                })}
               </div>
-            )}
+
+              {/* Country-specific recommendation */}
+              {country && recommendedModel && (
+                <div className="p-4 bg-white/5 border-t border-white/10">
+                  <div className="flex items-center space-x-2 text-sm text-white/80">
+                    <Star className="w-4 h-4 text-yellow-400" />
+                    <span>
+                      <strong>{models.available_models[recommendedModel].name}</strong> is recommended for <strong>{country}</strong>
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
