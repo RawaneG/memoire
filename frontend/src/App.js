@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  BarChart3, 
-  Brain, 
-  Globe, 
-  TrendingUp, 
-  Zap, 
+import {
+  BarChart3,
+  Brain,
+  Globe,
+  TrendingUp,
+  Zap,
   ChevronRight,
   AlertCircle,
   CheckCircle,
@@ -33,7 +33,8 @@ const App = () => {
   const [predictions, setPredictions] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-  
+  const [activeDropdown, setActiveDropdown] = useState(null);
+
   const { loading, error, predict, clearError } = useApi();
 
   // Animation variants
@@ -67,7 +68,7 @@ const App = () => {
 
     // Simulate analysis steps
     const steps = ['Fetching data', 'Processing features', 'Training model', 'Generating predictions'];
-    
+
     for (let i = 0; i < steps.length; i++) {
       setCurrentStep(i);
       await new Promise(resolve => setTimeout(resolve, 800));
@@ -89,11 +90,46 @@ const App = () => {
     clearError();
   };
 
+  const handleDropdownToggle = (dropdownType) => {
+    // If the same dropdown is clicked, toggle it
+    if (activeDropdown === dropdownType) {
+      setActiveDropdown(null);
+    } else {
+      // Close any other dropdown and open this one
+      setActiveDropdown(dropdownType);
+    }
+  };
+
+  const shouldCloseDropdown = (dropdownType) => {
+    return activeDropdown !== null && activeDropdown !== dropdownType;
+  };
+
+  // Close dropdowns when clicking outside the form
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setActiveDropdown(null);
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setActiveDropdown(null);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <div className="min-h-screen relative">
       <BackgroundElements />
       <OfflineNotice />
-      
+
       <div className="relative z-10">
         {/* Header */}
         <motion.header
@@ -111,7 +147,7 @@ const App = () => {
                 <Activity className="w-4 h-4 text-green-400" />
                 <span className="text-sm text-white/80 font-medium">Live Pandemic Prediction</span>
               </motion.div>
-              
+
               <motion.h1
                 className="text-5xl md:text-7xl font-bold text-white mb-4"
                 initial={{ scale: 0.9, opacity: 0 }}
@@ -122,15 +158,15 @@ const App = () => {
                 <br />
                 <span className="text-white/90">Predictor</span>
               </motion.h1>
-              
+
               <motion.p
                 className="text-xl text-white/70 max-w-2xl mx-auto leading-relaxed"
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.4, duration: 0.8 }}
               >
-                Advanced machine learning models for COVID-19 case prediction with 
-                <span className="text-primary-400 font-semibold"> country-specific optimizations</span> 
+                Advanced machine learning models for COVID-19 case prediction with
+                <span className="text-primary-400 font-semibold"> country-specific optimizations</span>
                 , especially for Senegal.
               </motion.p>
             </div>
@@ -140,7 +176,7 @@ const App = () => {
         {/* Main Content */}
         <main className="relative">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
-            
+
             {/* Prediction Form */}
             <motion.div
               variants={containerVariants}
@@ -158,14 +194,19 @@ const App = () => {
                     <h2 className="text-2xl font-bold text-white">Configuration</h2>
                   </div>
 
-                  <form onSubmit={handleSubmit} className="space-y-6">
+                  <form onSubmit={handleSubmit} className="space-y-6" onClick={(e) => e.stopPropagation()}>
                     {/* Country Selection */}
                     <div>
                       <label className="block text-sm font-semibold text-white/80 mb-3">
                         <Globe className="w-4 h-4 inline mr-2" />
                         Country
                       </label>
-                      <CountrySelector value={country} onChange={setCountry} />
+                      <CountrySelector
+                        value={country}
+                        onChange={setCountry}
+                        onToggle={handleDropdownToggle}
+                        shouldClose={shouldCloseDropdown('country')}
+                      />
                     </div>
 
                     {/* Model Selection */}
@@ -174,7 +215,13 @@ const App = () => {
                         <Zap className="w-4 h-4 inline mr-2" />
                         ML Model
                       </label>
-                      <ModelSelector value={model} onChange={setModel} country={country} />
+                      <ModelSelector
+                        value={model}
+                        onChange={setModel}
+                        country={country}
+                        onToggle={handleDropdownToggle}
+                        shouldClose={shouldCloseDropdown('model')}
+                      />
                     </div>
 
                     {/* Horizon Selection */}
@@ -188,11 +235,10 @@ const App = () => {
                           <motion.button
                             key={days}
                             type="button"
-                            className={`p-3 rounded-xl border-2 transition-all duration-300 font-medium ${
-                              horizon === days
+                            className={`p-3 rounded-xl border-2 transition-all duration-300 font-medium ${horizon === days
                                 ? 'border-primary-400 bg-primary-500/20 text-primary-300'
                                 : 'border-white/20 text-white/70 hover:border-white/40 hover:text-white'
-                            }`}
+                              }`}
                             onClick={() => setHorizon(days)}
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
@@ -251,7 +297,7 @@ const App = () => {
                       className="card-primary text-center"
                     >
                       <LoadingSpinner size="xl" text="Analyzing data" />
-                      
+
                       {isAnalyzing && (
                         <motion.div
                           className="mt-8 space-y-3"
@@ -261,9 +307,8 @@ const App = () => {
                           {['Fetching data', 'Processing features', 'Training model', 'Generating predictions'].map((step, index) => (
                             <motion.div
                               key={step}
-                              className={`flex items-center space-x-3 text-sm ${
-                                index <= currentStep ? 'text-white' : 'text-white/40'
-                              }`}
+                              className={`flex items-center space-x-3 text-sm ${index <= currentStep ? 'text-white' : 'text-white/40'
+                                }`}
                               initial={{ x: -20, opacity: 0 }}
                               animate={{ x: 0, opacity: 1 }}
                               transition={{ delay: index * 0.1 }}
@@ -317,7 +362,7 @@ const App = () => {
                     >
                       {/* Metrics */}
                       <MetricsDisplay predictions={predictions} />
-                      
+
                       {/* Chart */}
                       <div className="card-primary">
                         <div className="flex items-center space-x-3 mb-6">
@@ -329,7 +374,7 @@ const App = () => {
                             {predictions.horizon_days} days
                           </div>
                         </div>
-                        
+
                         <PredictionChart predictions={predictions} />
                       </div>
                     </motion.div>
@@ -346,7 +391,7 @@ const App = () => {
                         <Target className="w-20 h-20 text-white/40 mx-auto mb-6" />
                         <h3 className="text-2xl font-bold text-white mb-4">Ready to Predict</h3>
                         <p className="text-white/70 max-w-md mx-auto leading-relaxed">
-                          Configure your parameters on the left and click "Generate Prediction" 
+                          Configure your parameters on the left and click "Generate Prediction"
                           to see advanced ML-powered COVID-19 forecasts.
                         </p>
                       </div>

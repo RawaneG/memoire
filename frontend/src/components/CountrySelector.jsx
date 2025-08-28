@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Search, MapPin, Star } from 'lucide-react';
 import { useApi } from '../hooks/useApi';
 
-const CountrySelector = ({ value, onChange }) => {
+const CountrySelector = ({ value, onChange, onToggle, shouldClose }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [countries, setCountries] = useState({ featured_countries: [], other_countries: [] });
   const { getCountries } = useApi();
+  const dropdownRef = useRef(null);
+  const buttonRef = useRef(null);
 
   useEffect(() => {
     const fetchCountries = async () => {
@@ -35,6 +37,42 @@ const CountrySelector = ({ value, onChange }) => {
     fetchCountries();
   }, [getCountries]);
 
+  // Close dropdown when shouldClose prop changes
+  useEffect(() => {
+    if (shouldClose && isOpen) {
+      setIsOpen(false);
+      setSearchTerm('');
+    }
+  }, [shouldClose, isOpen]);
+
+  // Handle outside clicks and keyboard navigation
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target) && 
+          buttonRef.current && !buttonRef.current.contains(event.target)) {
+        setIsOpen(false);
+        setSearchTerm('');
+      }
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape' && isOpen) {
+        setIsOpen(false);
+        setSearchTerm('');
+        buttonRef.current?.focus();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+        document.removeEventListener('keydown', handleKeyDown);
+      };
+    }
+  }, [isOpen]);
+
   const filteredFeatured = countries.featured_countries.filter(country =>
     country.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -47,6 +85,17 @@ const CountrySelector = ({ value, onChange }) => {
     onChange(countryName);
     setIsOpen(false);
     setSearchTerm('');
+  };
+
+  const handleToggle = () => {
+    const newIsOpen = !isOpen;
+    setIsOpen(newIsOpen);
+    if (newIsOpen && onToggle) {
+      onToggle('country');
+    }
+    if (!newIsOpen) {
+      setSearchTerm('');
+    }
   };
 
   const dropdownVariants = {
@@ -76,9 +125,19 @@ const CountrySelector = ({ value, onChange }) => {
   return (
     <div className="relative">
       <motion.button
+        ref={buttonRef}
         type="button"
-        className="w-full flex items-center justify-between px-6 py-4 bg-white/10 backdrop-blur-sm border border-white/30 rounded-2xl text-white font-medium transition-all duration-300 hover:bg-white/20 hover:border-primary-400 focus:outline-none focus:border-primary-400 focus:bg-white/20"
-        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between px-6 py-4 bg-white/10 backdrop-blur-sm border border-white/30 rounded-2xl text-white font-medium transition-all duration-300 hover:bg-white/20 hover:border-primary-400 focus:outline-none focus:border-primary-400 focus:bg-white/20 focus:ring-2 focus:ring-primary-500/50"
+        onClick={handleToggle}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleToggle();
+          }
+        }}
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
+        aria-label="Select country"
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
       >
@@ -100,11 +159,20 @@ const CountrySelector = ({ value, onChange }) => {
       <AnimatePresence>
         {isOpen && (
           <motion.div
+            ref={dropdownRef}
             variants={dropdownVariants}
             initial="hidden"
             animate="visible"
             exit="hidden"
-            className="absolute z-50 w-full mt-2 glass-morphism rounded-2xl border border-white/30 shadow-2xl overflow-hidden"
+            className="absolute z-[100] w-full mt-2 glass-morphism-dropdown rounded-2xl shadow-2xl overflow-hidden"
+            style={{
+              background: 'rgba(15, 15, 25, 0.95)',
+              backdropFilter: 'blur(20px) saturate(180%)',
+              border: '1px solid rgba(255, 255, 255, 0.15)'
+            }}
+            role="listbox"
+            aria-label="Country options"
+            onClick={(e) => e.stopPropagation()}
           >
             {/* Search input */}
             <div className="p-4 border-b border-white/20">
@@ -120,7 +188,7 @@ const CountrySelector = ({ value, onChange }) => {
               </div>
             </div>
 
-            <div className="max-h-64 overflow-y-auto">
+            <div className="max-h-80 overflow-y-auto custom-scrollbar">
               {/* Featured countries */}
               {filteredFeatured.length > 0 && (
                 <div className="p-2">
