@@ -1,19 +1,21 @@
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
+import { useFormatting } from '../hooks/useFormatting';
 import { 
-  LineChart, 
   Line, 
   XAxis, 
   YAxis, 
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer,
-  ReferenceLine,
   Area,
   ComposedChart
 } from 'recharts';
 
 const PredictionChart = ({ predictions }) => {
+  const { t } = useTranslation();
+  const { formatNumber, formatDate } = useFormatting();
   const chartData = useMemo(() => {
     if (!predictions || !predictions.predictions) return [];
 
@@ -26,10 +28,6 @@ const PredictionChart = ({ predictions }) => {
     }));
   }, [predictions]);
 
-  const maxValue = useMemo(() => {
-    if (chartData.length === 0) return 0;
-    return Math.max(...chartData.map(d => d.confidence_upper));
-  }, [chartData]);
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
@@ -40,17 +38,17 @@ const PredictionChart = ({ predictions }) => {
           animate={{ opacity: 1, scale: 1 }}
           className="glass-morphism p-4 rounded-2xl border border-white/30"
         >
-          <div className="text-white font-semibold mb-2">{data.date}</div>
+          <div className="text-white font-semibold mb-2">{formatDate(data.date)}</div>
           <div className="space-y-2">
             <div className="flex items-center space-x-3">
               <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-              <span className="text-white/80">Predicted Cases:</span>
-              <span className="text-white font-bold">{data.prediction.toLocaleString()}</span>
+              <span className="text-white/80">{t('predictionChart.predictedCases')}:</span>
+              <span className="text-white font-bold">{formatNumber(data.prediction)}</span>
             </div>
             <div className="flex items-center space-x-3">
               <div className="w-3 h-3 bg-blue-300 rounded-full opacity-50"></div>
               <span className="text-white/60 text-sm">
-                Range: {data.confidence_lower.toLocaleString()} - {data.confidence_upper.toLocaleString()}
+                {t('predictionChart.range')}: {formatNumber(data.confidence_lower)} - {formatNumber(data.confidence_upper)}
               </span>
             </div>
           </div>
@@ -60,9 +58,9 @@ const PredictionChart = ({ predictions }) => {
     return null;
   };
 
-  const formatDate = (dateStr) => {
+  const formatDateForChart = (dateStr) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return formatDate(date, 'shortDate');
   };
 
   if (!chartData || chartData.length === 0) {
@@ -72,7 +70,7 @@ const PredictionChart = ({ predictions }) => {
           <div className="w-16 h-16 mx-auto mb-4 opacity-50">
             📈
           </div>
-          <p>No prediction data available</p>
+          <p>{t('predictionChart.noData')}</p>
         </div>
       </div>
     );
@@ -108,7 +106,7 @@ const PredictionChart = ({ predictions }) => {
             
             <XAxis 
               dataKey="date" 
-              tickFormatter={formatDate}
+              tickFormatter={formatDateForChart}
               stroke="rgba(255,255,255,0.6)"
               fontSize={12}
               tickLine={false}
@@ -120,7 +118,7 @@ const PredictionChart = ({ predictions }) => {
               fontSize={12}
               tickLine={false}
               axisLine={false}
-              tickFormatter={(value) => value.toLocaleString()}
+              tickFormatter={(value) => formatNumber(value, { compact: true })}
             />
             
             {/* Confidence interval area */}
@@ -164,11 +162,11 @@ const PredictionChart = ({ predictions }) => {
       >
         <div className="flex items-center space-x-2">
           <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-          <span className="text-white/80">Predicted Cases</span>
+          <span className="text-white/80">{t('predictionChart.predictedCases')}</span>
         </div>
         <div className="flex items-center space-x-2">
           <div className="w-3 h-3 bg-blue-300 rounded-full opacity-50"></div>
-          <span className="text-white/80">Confidence Range</span>
+          <span className="text-white/80">{t('predictionChart.confidenceRange')}</span>
         </div>
       </motion.div>
 
@@ -181,27 +179,27 @@ const PredictionChart = ({ predictions }) => {
       >
         <div className="text-center">
           <div className="text-2xl font-bold text-green-400">
-            {Math.min(...chartData.map(d => d.prediction)).toLocaleString()}
+            {formatNumber(Math.min(...chartData.map(d => d.prediction)))}
           </div>
-          <div className="text-sm text-white/60">Minimum</div>
+          <div className="text-sm text-white/60">{t('predictionChart.minimum')}</div>
         </div>
         <div className="text-center">
           <div className="text-2xl font-bold text-red-400">
-            {Math.max(...chartData.map(d => d.prediction)).toLocaleString()}
+            {formatNumber(Math.max(...chartData.map(d => d.prediction)))}
           </div>
-          <div className="text-sm text-white/60">Maximum</div>
+          <div className="text-sm text-white/60">{t('predictionChart.maximum')}</div>
         </div>
         <div className="text-center">
           <div className="text-2xl font-bold text-blue-400">
-            {Math.round(chartData.reduce((sum, d) => sum + d.prediction, 0) / chartData.length).toLocaleString()}
+            {formatNumber(Math.round(chartData.reduce((sum, d) => sum + d.prediction, 0) / chartData.length))}
           </div>
-          <div className="text-sm text-white/60">Average</div>
+          <div className="text-sm text-white/60">{t('predictionChart.average')}</div>
         </div>
         <div className="text-center">
           <div className="text-2xl font-bold text-purple-400">
-            {chartData.reduce((sum, d) => sum + d.prediction, 0).toLocaleString()}
+            {formatNumber(chartData.reduce((sum, d) => sum + d.prediction, 0))}
           </div>
-          <div className="text-sm text-white/60">Total</div>
+          <div className="text-sm text-white/60">{t('predictionChart.total')}</div>
         </div>
       </motion.div>
     </div>

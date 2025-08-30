@@ -1,0 +1,189 @@
+{
+  "app": {
+    "title": "Prédicteur COVID-19 OWID",
+    "subtitle": "Prédictions alimentées par l'IA avec des modèles d'apprentissage automatique avancés"
+  },
+  "navigation": {
+    "home": "Accueil",
+    "about": "À propos",
+    "help": "Aide"
+  },
+  "countrySelector": {
+    "title": "Sélectionnez un Pays",
+    "subtitle": "Choisissez un pays pour les prédictions COVID-19",
+    "searchPlaceholder": "Rechercher un pays...",
+    "noResults": "Aucun pays trouvé correspondant à",
+    "featuredCountries": "Pays en Vedette", 
+    "otherCountries": "Autres Pays",
+    "specialConfig": "Configuration Spéciale",
+    "totalCountries": "pays disponibles",
+    "selectCountry": "Sélectionnez un pays",
+    "optimized": "Optimisé"
+  },
+  "modelSelector": {
+    "title": "Choisissez un Modèle ML",
+    "subtitle": "Sélectionnez l'algorithme d'apprentissage automatique",
+    "recommended": "Recommandé",
+    "complexity": "Complexité",
+    "accuracy": "Précision", 
+    "speed": "Vitesse",
+    "selectModel": "Sélectionnez un modèle",
+    "bestFor": "Idéal pour",
+    "recommendedFor": "est recommandé pour",
+    "levels": {
+      "low": "Faible",
+      "medium": "Moyen",
+      "high": "Élevé",
+      "veryHigh": "Très Élevé",
+      "fast": "Rapide",
+      "slow": "Lent"
+    },
+    "models": {
+      "linear": {
+        "name": "Régression Linéaire", 
+        "description": "Simple, rapide et interprétable",
+        "bestFor": "Idéal pour les données limitées et les tendances linéaires"
+      },
+      "random_forest": {
+        "name": "Forêt Aléatoire",
+        "description": "Modèle d'ensemble robuste",
+        "bestFor": "Idéal pour les données complexes et les relations non-linéaires"
+      },
+      "gradient_boost": {
+        "name": "Gradient Boosting",
+        "description": "Modèle avancé haute précision",
+        "bestFor": "Idéal pour les prédictions précises et les grands ensembles de données"
+      }
+    }
+  },
+  "predictionChart": {
+    "title": "Prédictions COVID-19",
+    "subtitle": "Prédictions pour les {{days}} prochains jours",
+    "loading": "Génération des prédictions...",
+    "error": "Erreur lors de la génération des prédictions",
+    "retry": "Réessayer",
+    "noData": "Aucune donnée de prédiction disponible",
+    "predictedCases": "Cas Prédits",
+    "confidenceRange": "Plage de Confiance",
+    "range": "Plage",
+    "minimum": "Minimum",
+    "maximum": "Maximum", 
+    "average": "Moyenne",
+    "total": "Total",
+    "metrics": {
+      "title": "Métriques du Modèle",
+      "rmse": "RMSE",
+      "mae": "MAE", 
+      "r2Score": "Score R²",
+      "trainingSamples": "Échantillons d'Entraînement",
+      "testSamples": "Échantillons de Test"
+    },
+    "chart": {
+      "cases": "Cas",
+      "date": "Date",
+      "prediction": "Prédiction",
+      "confidence": "Intervalle de Confiance"
+    }
+  },
+  "offlineNotice": {
+    "title": "Mode Démo Actif",
+    "message": "Le serveur backend n'est pas en cours d'exécution. Utilisation des données de démonstration pour la visualisation.",
+    "warning": "Les prédictions sont simulées"
+  },
+  "loadingSpinner": {
+    "loading": "Chargement...",
+    "preparing": "Préparation des données...",
+    "training": "Entraînement du modèle...",
+    "predicting": "Génération des prédictions..."
+  },
+  "processingSteps": {
+    "fetchingData": "Récupération des données",
+    "processingFeatures": "Traitement des fonctionnalités", 
+    "trainingModel": "Entraînement du modèle",
+    "generatingPredictions": "Génération des prédictions"
+  },
+  "metricsDisplay": {
+    "modelPerformance": "Performance du Modèle",
+    "overallAccuracy": "Métriques de précision globale",
+    "errorAnalysis": "Analyse d'Erreur",
+    "predictionAccuracy": "Précision des prédictions",
+    "trainingData": "Données d'Entraînement",
+    "datasetInfo": "Informations sur le dataset",
+    "configuration": "Configuration",
+    "modelCountrySettings": "Paramètres du modèle et du pays",
+    "performance": "Performance",
+    "trainingSamples": "Échantillons d'Entraînement",
+    "testSamples": "Échantillons de Test",
+    "featuresUsed": "Fonctionnalités Utilisées",
+    "country": "Pays",
+    "modelType": "Type de Modèle",
+    "features": "Fonctionnalités",
+    "more": "plus",
+    "lowerBetter": "Les valeurs inférieures indiquent une meilleure précision",
+    "performanceLevels": {
+      "excellent": "Excellent",
+      "good": "Bon",
+      "fair": "Correct",
+      "poor": "Mauvais"
+    }
+  },
+  "horizon": {
+    "title": "Horizon de Prédiction",
+    "subtitle": "Sélectionnez la période de prédiction",
+    "days": "jours",
+    "options": {
+      "7": "1 semaine",
+      "14": "2 semaines",
+      "21": "3 semaines",
+      "30": "1 mois"
+    }
+  },
+  "buttons": {
+    "predict": "Prédire",
+    "loading": "Chargement...",
+    "retry": "Réessayer",
+    "close": "Fermer",
+    "dismiss": "Ignorer",
+    "select": "Sélectionner",
+    "clear": "Effacer",
+    "export": "Exporter",
+    "download": "Télécharger"
+  },
+  "errors": {
+    "generic": "Une erreur s'est produite",
+    "networkError": "Erreur de réseau",
+    "serverError": "Erreur du serveur",
+    "dataNotFound": "Données non trouvées",
+    "invalidInput": "Entrée invalide",
+    "tryAgain": "Veuillez réessayer plus tard"
+  },
+  "status": {
+    "healthy": "Service en ligne",
+    "offline": "Service hors ligne",
+    "connecting": "Connexion...",
+    "connected": "Connecté",
+    "disconnected": "Déconnecté"
+  },
+  "features": {
+    "realTimeData": "Données en Temps Réel",
+    "multipleModels": "Modèles Multiples",
+    "countrySpecific": "Spécifique au Pays",
+    "confidenceIntervals": "Intervalles de Confiance"
+  },
+  "formatting": {
+    "numbers": {
+      "thousand": "k",
+      "million": "M", 
+      "billion": "G"
+    },
+    "dates": {
+      "today": "Aujourd'hui",
+      "tomorrow": "Demain",
+      "yesterday": "Hier"
+    }
+  },
+  "welcome": {
+    "title": "Prêt à Prédire",
+    "message": "Configurez vos paramètres à gauche et cliquez sur \"Prédire\" pour voir des prévisions COVID-19 avancées alimentées par ML."
+  }
+}

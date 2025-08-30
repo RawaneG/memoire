@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Zap, Star, Info, TrendingUp } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const ModelSelector = ({ value, onChange, country, onToggle, shouldClose }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
   const buttonRef = useRef(null);
-  const [models, setModels] = useState({
+  const { t } = useTranslation();
+  const [models] = useState({
     available_models: {
       linear: {
         name: 'Linear Regression',
@@ -58,11 +60,18 @@ const ModelSelector = ({ value, onChange, country, onToggle, shouldClose }) => {
   };
 
   const getComplexityColor = (complexity) => {
+    const lowKey = t('modelSelector.levels.low');
+    const mediumKey = t('modelSelector.levels.medium');
+    const highKey = t('modelSelector.levels.high');
+    
     switch (complexity) {
+      case lowKey:
       case 'Low':
         return 'text-green-400 bg-green-500/20 border-green-500/30';
+      case mediumKey:
       case 'Medium':
         return 'text-yellow-400 bg-yellow-500/20 border-yellow-500/30';
+      case highKey:
       case 'High':
         return 'text-red-400 bg-red-500/20 border-red-500/30';
       default:
@@ -71,11 +80,18 @@ const ModelSelector = ({ value, onChange, country, onToggle, shouldClose }) => {
   };
 
   const getAccuracyColor = (accuracy) => {
+    const mediumKey = t('modelSelector.levels.medium');
+    const highKey = t('modelSelector.levels.high');
+    const veryHighKey = t('modelSelector.levels.veryHigh');
+    
     switch (accuracy) {
+      case mediumKey:
       case 'Medium':
         return 'text-yellow-400';
+      case highKey:
       case 'High':
         return 'text-green-400';
+      case veryHighKey:
       case 'Very High':
         return 'text-emerald-400';
       default:
@@ -172,19 +188,19 @@ const ModelSelector = ({ value, onChange, country, onToggle, shouldClose }) => {
         }}
         aria-expanded={isOpen}
         aria-haspopup="listbox"
-        aria-label="Select ML model"
+        aria-label={t('modelSelector.title')}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
       >
         <div className="flex items-center space-x-3">
           <IconComponent className="w-5 h-5 text-primary-400" />
           <div className="text-left">
-            <div className="font-semibold">{selectedModel?.name || 'Select a model'}</div>
+            <div className="font-semibold">{selectedModel?.name || t('modelSelector.selectModel')}</div>
             <div className="text-xs text-white/60">{selectedModel?.description}</div>
           </div>
           {value === recommendedModel && (
             <div className="px-2 py-1 text-xs bg-green-500/20 text-green-400 rounded-full border border-green-500/30">
-              Recommended
+              {t('modelSelector.recommended')}
             </div>
           )}
         </div>
@@ -212,7 +228,7 @@ const ModelSelector = ({ value, onChange, country, onToggle, shouldClose }) => {
               maxHeight: '70vh'
             }}
             role="listbox"
-            aria-label="ML model options"
+            aria-label={t('modelSelector.title')}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="overflow-y-auto custom-scrollbar" style={{ maxHeight: 'calc(70vh - 1rem)' }}>
@@ -255,7 +271,7 @@ const ModelSelector = ({ value, onChange, country, onToggle, shouldClose }) => {
                         
                         {isRecommended && (
                           <div className="px-2 py-1 text-xs bg-green-500/20 text-green-400 rounded-full border border-green-500/30">
-                            Recommended
+                            {t('modelSelector.recommended')}
                           </div>
                         )}
                       </div>
@@ -263,20 +279,20 @@ const ModelSelector = ({ value, onChange, country, onToggle, shouldClose }) => {
                       {/* Model specs */}
                       <div className="grid grid-cols-3 gap-3 text-xs">
                         <div className="text-center">
-                          <div className="text-white/60 mb-1">Complexity</div>
+                          <div className="text-white/60 mb-1">{t('modelSelector.complexity')}</div>
                           <div className={`px-2 py-1 rounded-full border text-xs font-medium ${getComplexityColor(model.complexity)}`}>
-                            {model.complexity}
+                            {t(`modelSelector.levels.${model.complexity?.toLowerCase()}`) || model.complexity}
                           </div>
                         </div>
                         <div className="text-center">
-                          <div className="text-white/60 mb-1">Accuracy</div>
+                          <div className="text-white/60 mb-1">{t('modelSelector.accuracy')}</div>
                           <div className={`font-medium ${getAccuracyColor(model.accuracy)}`}>
-                            {model.accuracy}
+                            {model.accuracy === 'Very High' ? t('modelSelector.levels.veryHigh') : t(`modelSelector.levels.${model.accuracy?.toLowerCase()}`) || model.accuracy}
                           </div>
                         </div>
                         <div className="text-center">
-                          <div className="text-white/60 mb-1">Speed</div>
-                          <div className="text-white font-medium">{model.speed}</div>
+                          <div className="text-white/60 mb-1">{t('modelSelector.speed')}</div>
+                          <div className="text-white font-medium">{t(`modelSelector.levels.${model.speed?.toLowerCase()}`) || model.speed}</div>
                         </div>
                       </div>
 
@@ -284,7 +300,7 @@ const ModelSelector = ({ value, onChange, country, onToggle, shouldClose }) => {
                       <div className="mt-3 pt-3 border-t border-white/10">
                         <div className="flex items-center space-x-2 text-xs text-white/60">
                           <Info className="w-3 h-3" />
-                          <span>Best for: {model.best_for.join(', ')}</span>
+                          <span>{t('modelSelector.bestFor')}: {model.best_for.join(', ')}</span>
                         </div>
                       </div>
                     </motion.button>
@@ -298,7 +314,7 @@ const ModelSelector = ({ value, onChange, country, onToggle, shouldClose }) => {
                   <div className="flex items-center space-x-2 text-sm text-white/80">
                     <Star className="w-4 h-4 text-yellow-400" />
                     <span>
-                      <strong>{models.available_models[recommendedModel].name}</strong> is recommended for <strong>{country}</strong>
+                      <strong>{models.available_models[recommendedModel].name}</strong> {t('modelSelector.recommendedFor')} <strong>{country}</strong>
                     </span>
                   </div>
                 </div>

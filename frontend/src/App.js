@@ -22,9 +22,11 @@ import PredictionChart from './components/PredictionChart';
 import ModelSelector from './components/ModelSelector';
 import MetricsDisplay from './components/MetricsDisplay';
 import OfflineNotice from './components/OfflineNotice';
+import LanguageSwitcher from './components/LanguageSwitcher';
 
 // Hooks
 import { useApi } from './hooks/useApi';
+import { useTranslation } from 'react-i18next';
 
 const App = () => {
   const [country, setCountry] = useState('Senegal');
@@ -36,6 +38,7 @@ const App = () => {
   const [activeDropdown, setActiveDropdown] = useState(null);
 
   const { loading, error, predict, clearError } = useApi();
+  const { t } = useTranslation();
 
   // Animation variants
   const containerVariants = {
@@ -67,7 +70,12 @@ const App = () => {
     setCurrentStep(0);
 
     // Simulate analysis steps
-    const steps = ['Fetching data', 'Processing features', 'Training model', 'Generating predictions'];
+    const steps = [
+      t('processingSteps.fetchingData'), 
+      t('processingSteps.processingFeatures'), 
+      t('processingSteps.trainingModel'), 
+      t('processingSteps.generatingPredictions')
+    ];
 
     for (let i = 0; i < steps.length; i++) {
       setCurrentStep(i);
@@ -139,13 +147,18 @@ const App = () => {
           className="relative pt-8 pb-4"
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Language Switcher */}
+            <div className="flex justify-end mb-6">
+              <LanguageSwitcher />
+            </div>
+            
             <div className="text-center">
               <motion.div
                 className="inline-flex items-center space-x-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 mb-6"
                 whileHover={{ scale: 1.05 }}
               >
                 <Activity className="w-4 h-4 text-green-400" />
-                <span className="text-sm text-white/80 font-medium">Live Pandemic Prediction</span>
+                <span className="text-sm text-white/80 font-medium">{t('app.subtitle')}</span>
               </motion.div>
 
               <motion.h1
@@ -174,7 +187,7 @@ const App = () => {
         </motion.header>
 
         {/* Main Content */}
-        <main className="relative">
+        <main className="relative mt-8">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
 
             {/* Prediction Form */}
@@ -191,7 +204,7 @@ const App = () => {
                     <div className="p-2 bg-gradient-to-r from-primary-500 to-accent-500 rounded-xl">
                       <Brain className="w-6 h-6 text-white" />
                     </div>
-                    <h2 className="text-2xl font-bold text-white">Configuration</h2>
+                    <h2 className="text-2xl font-bold text-white">{t('countrySelector.title')}</h2>
                   </div>
 
                   <form onSubmit={handleSubmit} className="space-y-6" onClick={(e) => e.stopPropagation()}>
@@ -199,7 +212,7 @@ const App = () => {
                     <div>
                       <label className="block text-sm font-semibold text-white/80 mb-3">
                         <Globe className="w-4 h-4 inline mr-2" />
-                        Country
+{t('countrySelector.title')}
                       </label>
                       <CountrySelector
                         value={country}
@@ -213,7 +226,7 @@ const App = () => {
                     <div>
                       <label className="block text-sm font-semibold text-white/80 mb-3">
                         <Zap className="w-4 h-4 inline mr-2" />
-                        ML Model
+{t('modelSelector.title')}
                       </label>
                       <ModelSelector
                         value={model}
@@ -228,7 +241,7 @@ const App = () => {
                     <div>
                       <label className="block text-sm font-semibold text-white/80 mb-3">
                         <Calendar className="w-4 h-4 inline mr-2" />
-                        Prediction Horizon
+{t('horizon.title')}
                       </label>
                       <div className="grid grid-cols-3 gap-2">
                         {[7, 14, 21, 30].map((days) => (
@@ -236,8 +249,8 @@ const App = () => {
                             key={days}
                             type="button"
                             className={`p-3 rounded-xl border-2 transition-all duration-300 font-medium ${horizon === days
-                                ? 'border-primary-400 bg-primary-500/20 text-primary-300'
-                                : 'border-white/20 text-white/70 hover:border-white/40 hover:text-white'
+                              ? 'border-primary-400 bg-primary-500/20 text-white'
+                              : 'border-white/20 text-white/70 hover:border-white/40 hover:text-white'
                               }`}
                             onClick={() => setHorizon(days)}
                             whileHover={{ scale: 1.02 }}
@@ -263,7 +276,7 @@ const App = () => {
                         ) : (
                           <>
                             <TrendingUp className="w-5 h-5" />
-                            <span>Generate Prediction</span>
+                            <span>{t('buttons.predict')}</span>
                             <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                           </>
                         )}
@@ -278,7 +291,7 @@ const App = () => {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                       >
-                        Reset & New Prediction
+{t('buttons.retry')}
                       </motion.button>
                     )}
                   </form>
@@ -288,7 +301,7 @@ const App = () => {
               {/* Results Panel */}
               <motion.div variants={itemVariants} className="lg:col-span-2">
                 <AnimatePresence mode="wait">
-                  {(loading || isAnalyzing) && (
+                  {(loading || isAnalyzing) ? (
                     <motion.div
                       key="loading"
                       initial={{ opacity: 0, scale: 0.9 }}
@@ -296,7 +309,7 @@ const App = () => {
                       exit={{ opacity: 0, scale: 0.9 }}
                       className="card-primary text-center"
                     >
-                      <LoadingSpinner size="xl" text="Analyzing data" />
+                      <LoadingSpinner size="xl" text={t('loadingSpinner.preparing')} />
 
                       {isAnalyzing && (
                         <motion.div
@@ -326,9 +339,7 @@ const App = () => {
                         </motion.div>
                       )}
                     </motion.div>
-                  )}
-
-                  {error && (
+                  ) : error ? (
                     <motion.div
                       key="error"
                       initial={{ opacity: 0, scale: 0.9 }}
@@ -338,7 +349,7 @@ const App = () => {
                     >
                       <div className="text-center">
                         <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-                        <h3 className="text-xl font-bold text-red-400 mb-2">Prediction Failed</h3>
+                        <h3 className="text-xl font-bold text-red-400 mb-2">{t('errors.generic')}</h3>
                         <p className="text-white/70">{error}</p>
                         <motion.button
                           className="button-primary mt-6"
@@ -346,13 +357,11 @@ const App = () => {
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                         >
-                          Try Again
+{t('buttons.retry')}
                         </motion.button>
                       </div>
                     </motion.div>
-                  )}
-
-                  {predictions && !loading && !error && (
+                  ) : predictions ? (
                     <motion.div
                       key="results"
                       initial={{ opacity: 0, scale: 0.9 }}
@@ -378,21 +387,19 @@ const App = () => {
                         <PredictionChart predictions={predictions} />
                       </div>
                     </motion.div>
-                  )}
-
-                  {!predictions && !loading && !error && (
+                  ) : (
                     <motion.div
                       key="welcome"
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
                       className="card-primary text-center"
                     >
                       <div className="py-12">
                         <Target className="w-20 h-20 text-white/40 mx-auto mb-6" />
-                        <h3 className="text-2xl font-bold text-white mb-4">Ready to Predict</h3>
+                        <h3 className="text-2xl font-bold text-white mb-4">{t('welcome.title')}</h3>
                         <p className="text-white/70 max-w-md mx-auto leading-relaxed">
-                          Configure your parameters on the left and click "Generate Prediction"
-                          to see advanced ML-powered COVID-19 forecasts.
+                          {t('welcome.message')}
                         </p>
                       </div>
                     </motion.div>

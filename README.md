@@ -1,19 +1,22 @@
 # 📊 OWID COVID-19 Predictor
 
-Une application web moderne de prédiction COVID-19 utilisant l'intelligence artificielle et des modèles d'apprentissage automatique avancés, avec une interface utilisateur primée et des optimisations spécifiques pour le Sénégal.
+Une application web moderne de prédiction COVID-19 utilisant l'intelligence artificielle et des modèles d'apprentissage automatique avancés, avec une interface utilisateur primée et des optimisations spécifiques pour 10 pays stratégiques.
 
 ## 🎯 Aperçu du Projet
 
-OWID Predictor combine des visualisations de données interactives avec des modèles ML sophistiqués pour fournir des prédictions précises des cas COVID-19. L'application utilise React avec des animations Framer Motion fluides et un backend Flask robuste avec plusieurs algorithmes d'apprentissage automatique.
+OWID Predictor combine des visualisations de données interactives avec des modèles ML sophistiqués pour fournir des prédictions précises des cas COVID-19. L'application utilise React avec des animations Framer Motion fluides et un backend Flask robuste avec Apache Spark et plusieurs algorithmes d'apprentissage automatique avancés.
 
 ### ✨ Fonctionnalités Principales
 
-- 🌍 **Sélection de Pays Intelligent** - Recherche en temps réel avec pays vedettes
+- 🌍 **10 Pays Configurés** - 5 pays africains + 5 pays développés avec optimisations spécifiques
 - 🤖 **Modèles ML Multiples** - Régression linéaire, Forêt aléatoire, Gradient Boosting
 - 📈 **Visualisations Interactives** - Graphiques avec intervalles de confiance
 - 🎨 **Interface Moderne** - Design glassmorphism avec animations fluides
-- ⚡ **Performance Optimisée** - Chargement rapide et interactions responsives
-- 🌟 **Optimisations Spécifiques** - Configuration spéciale pour le Sénégal
+- ⚡ **Performance Optimisée** - Apache Spark pour le traitement des données à grande échelle
+- 🌟 **Données Réelles OWID** - Plus de 429,000 enregistrements avec 67 variables
+- 🎯 **Prédictions Spécialisées** - Modèles recommandés par pays et continent
+- 🌐 **Internationalisation** - Support complet français/anglais avec détection automatique
+- 🔄 **Mode Hors-ligne** - Données de fallback et prédictions simulées
 
 ---
 
@@ -31,6 +34,31 @@ OWID Predictor combine des visualisations de données interactives avec des mod�
 
 - Python 3.8+
 - pip gestionnaire de paquets
+
+### ⚙️ Configuration des Environnements
+
+Le projet utilise un module de configuration centralisé pour gérer les URLs d'API selon l'environnement :
+
+**Fichier:** `frontend/src/config/environments.js`
+
+```javascript
+const environments = {
+  development: {
+    API_BASE_URL: 'http://localhost:5000',
+  },
+  production: {
+    API_BASE_URL: 'https://your-production-api.com',
+  },
+  staging: {
+    API_BASE_URL: 'https://your-staging-api.com',
+  }
+};
+```
+
+**Avantages:**
+- ✅ Configuration centralisée des URLs d'API
+- ✅ Basculement automatique selon `NODE_ENV`
+- ✅ Pas besoin de modifier le code pour changer d'environnement
 
 ### ⚡ Installation Rapide
 
@@ -52,19 +80,21 @@ python -m venv venv
 
 # Activer l'environnement virtuel
 
-# Windows (Command Prompt):
-venv\Scripts\activate
-# Mac/Linux:
-source venv/bin/activate
+  # Windows (Command Prompt Terminal):
+  venv\Scripts\activate
+  # Mac/Linux:
+  source venv/bin/activate
 
-# Installer les dépendances
+# Installer les dépendances (y compris Apache Spark)
 pip install -r requirements.txt
 
-# Lancer le serveur
-python simple_app.py
+# Lancer le serveur principal avec Spark
+python app.py
 ```
 
-Le backend sera disponible sur `http://localhost:5001`
+Le backend sera disponible sur `http://localhost:5000`
+
+**Note:** Pour une version simplifiée sans Spark, utilisez `python simple_app.py` à la place.
 
 #### 3. Configuration Frontend
 
@@ -90,24 +120,35 @@ L'application sera disponible sur `http://localhost:3000`
 ```
 OWID/
 ├── backend/                     # API Flask et modèles ML
-│   ├── simple_app.py           # Serveur principal
-│   ├── app.py                  # Version avec Spark (optionnelle)
+│   ├── app.py                  # Serveur principal avec Apache Spark
+│   ├── simple_app.py           # Version simplifiée (optionnelle)
 │   ├── spark_model.py          # Modèles ML avec Spark
 │   ├── requirements.txt        # Dépendances Python
-│   └── owid-covid-data-sample.csv  # Données d'exemple
+│   └── owid-covid-data-sample.csv  # Données OWID réelles (429k+ enregistrements)
 ├── frontend/                   # Application React
 │   ├── src/
 │   │   ├── components/         # Composants réutilisables
 │   │   │   ├── CountrySelector.jsx
 │   │   │   ├── ModelSelector.jsx
 │   │   │   ├── PredictionChart.jsx
+│   │   │   ├── OfflineNotice.jsx
+│   │   │   ├── LanguageSwitcher.jsx
+│   │   │   ├── BackgroundElements.jsx
+│   │   │   ├── LoadingSpinner.jsx
+│   │   │   ├── MetricsDisplay.jsx
 │   │   │   └── ...
+│   │   ├── config/             # Configuration et environnements
+│   │   │   └── environments.js # Configuration API par environnement
 │   │   ├── hooks/              # Hooks personnalisés
-│   │   │   └── useApi.js
+│   │   │   └── useApi.js       # Hook API avec fallback offline
+│   │   ├── i18n.js             # Configuration internationalisation
 │   │   ├── App.js              # Composant racine
 │   │   ├── index.css           # Styles globaux
 │   │   └── index.js            # Point d'entrée
 │   ├── public/
+│   │   └── locales/            # Fichiers de traduction
+│   │       ├── en/             # Traductions anglaises
+│   │       └── fr/             # Traductions françaises
 │   ├── package.json
 │   └── tailwind.config.js      # Configuration Tailwind
 └── README.md                   # Ce fichier
@@ -124,16 +165,21 @@ OWID/
 | **Tailwind CSS**  | 3.3.6    | Framework CSS utilitaire  |
 | **Recharts**      | 2.8.0    | Visualisation de données  |
 | **Lucide React**  | 0.294.0  | Bibliothèque d'icônes     |
+| **i18next**       | 25.4.2   | Internationalisation      |
+| **react-i18next** | 15.7.3   | Intégration React i18n    |
+| **clsx**          | 2.0.0    | Gestion classes CSS conditionnelles |
 
 #### Backend
 
-| Technologie      | Usage                               |
-| ---------------- | ----------------------------------- |
-| **Flask**        | Framework web Python                |
-| **scikit-learn** | Modèles d'apprentissage automatique |
-| **pandas**       | Manipulation de données             |
-| **numpy**        | Calculs numériques                  |
-| **CORS**         | Support cross-origin                |
+| Technologie      | Usage                                  |
+| ---------------- | -------------------------------------- |
+| **Flask**        | Framework web Python                   |
+| **Apache Spark** | Traitement de données à grande échelle |
+| **PySpark ML**   | Modèles d'apprentissage automatique    |
+| **scikit-learn** | Modèles ML (version simplifiée)        |
+| **pandas**       | Manipulation de données                |
+| **numpy**        | Calculs numériques                     |
+| **CORS**         | Support cross-origin                   |
 
 ---
 
@@ -141,9 +187,27 @@ OWID/
 
 ### 🌍 1. Sélection du Pays
 
-- **Pays Vedettes**: Sénégal (optimisé), France, Allemagne
-- **Recherche**: Tapez pour filtrer la liste des pays
-- **Badge Spécial**: Le Sénégal affiche "Optimized" pour les configurations spéciales
+#### **Pays Africains Configurés** (5)
+
+- 🇸🇳 **Sénégal** - Modèle recommandé: Forêt Aléatoire
+- 🇳🇬 **Nigeria** - Modèle recommandé: Forêt Aléatoire
+- 🇿🇦 **Afrique du Sud** - Modèle recommandé: Gradient Boosting
+- 🇰🇪 **Kenya** - Modèle recommandé: Forêt Aléatoire
+- 🇲🇦 **Maroc** - Modèle recommandé: Gradient Boosting
+
+#### **Pays Développés Configurés** (5)
+
+- 🇫🇷 **France** - Modèle recommandé: Gradient Boosting
+- 🇩🇪 **Allemagne** - Modèle recommandé: Gradient Boosting
+- 🇬🇧 **Royaume-Uni** - Modèle recommandé: Gradient Boosting
+- 🇺🇸 **États-Unis** - Modèle recommandé: Gradient Boosting
+- 🇨🇦 **Canada** - Modèle recommandé: Gradient Boosting
+
+**Fonctionnalités:**
+
+- **Recherche en temps réel**: Tapez pour filtrer la liste des pays
+- **Badge Spécial**: Pays configurés affichent des optimisations spécifiques
+- **Plus de 255 pays disponibles** dans la base de données OWID
 
 ### 🤖 2. Choix du Modèle ML
 
@@ -154,19 +218,21 @@ OWID/
 - 🚀 **Vitesse**: Rapide
 - 💡 **Idéal pour**: Tendances simples, données limitées
 
-#### **Forêt Aléatoire** ⭐ Recommandé pour le Sénégal
+#### **Forêt Aléatoire** ⭐ Recommandé pour l'Afrique
 
 - ⚡ **Complexité**: Moyenne
 - 📊 **Précision**: Élevée
 - 🚀 **Vitesse**: Moyenne
-- 💡 **Idéal pour**: Relations complexes, données non-linéaires
+- 💡 **Idéal pour**: Relations complexes, pays en développement, données non-linéaires
+- 🌍 **Optimisé pour**: Sénégal, Nigeria, Kenya
 
-#### **Gradient Boosting**
+#### **Gradient Boosting** ⭐ Recommandé pour les Pays Développés
 
 - ⚡ **Complexité**: Élevée
 - 📊 **Précision**: Très élevée
 - 🚀 **Vitesse**: Lente
-- 💡 **Idéal pour**: Prédictions haute précision, gros datasets
+- 💡 **Idéal pour**: Prédictions haute précision, gros datasets, données riches
+- 🌍 **Optimisé pour**: France, Allemagne, États-Unis, Canada, Afrique du Sud, Maroc
 
 ### 📅 3. Horizon de Prédiction
 
@@ -200,7 +266,8 @@ GET /health
 {
   "status": "healthy",
   "service": "OWID COVID-19 Prediction API",
-  "version": "2.0-simple"
+  "version": "2.0",
+  "features": ["multi-model", "country-specific", "senegal-optimized"]
 }
 ```
 
@@ -214,11 +281,17 @@ GET /countries
 
 ```json
 {
-  "total_countries": 9,
+  "total_countries": 255,
   "featured_countries": [
     {
       "name": "Senegal",
-      "has_special_config": true
+      "has_special_config": true,
+      "config": {
+        "continent": "Africa",
+        "recommended_model": "random_forest",
+        "vaccination_lag": 30,
+        "seasonal_factor": true
+      }
     }
   ],
   "other_countries": [...]
@@ -248,7 +321,16 @@ GET /models
     }
   },
   "recommended_by_country": {
-    "Senegal": "random_forest"
+    "Senegal": "random_forest",
+    "Nigeria": "random_forest",
+    "Kenya": "random_forest",
+    "South Africa": "gradient_boost",
+    "Morocco": "gradient_boost",
+    "France": "gradient_boost",
+    "Germany": "gradient_boost",
+    "United Kingdom": "gradient_boost",
+    "United States": "gradient_boost",
+    "Canada": "gradient_boost"
   }
 }
 ```
@@ -259,11 +341,20 @@ GET /models
 GET /predict?country=Senegal&model=random_forest&horizon=14
 ```
 
+### 🚀 Prédictions Groupées (Nouveau!)
+
+```http
+GET /predict_all?model=linear&horizon=7
+```
+
+Génère des prédictions pour tous les 10 pays configurés en une seule requête avec leurs modèles recommandés.
+
 **Paramètres:**
 
 - `country`: Nom du pays (obligatoire)
 - `model`: Type de modèle (`linear`, `random_forest`, `gradient_boost`)
 - `horizon`: Nombre de jours (1-30)
+- `data_path`: Chemin vers données OWID (optionnel)
 
 **Réponse:**
 
@@ -272,6 +363,20 @@ GET /predict?country=Senegal&model=random_forest&horizon=14
   "country": "Senegal",
   "model_type": "random_forest",
   "horizon_days": 14,
+  "training_samples": 1339,
+  "test_samples": 335,
+  "features_used": [
+    "cases_lag_1",
+    "cases_lag_3",
+    "cases_lag_7",
+    "cases_lag_14",
+    "deaths_lag_1",
+    "deaths_lag_7",
+    "vaccinations_lag_7",
+    "stringency_lag_1",
+    "seasonal_sin",
+    "seasonal_cos"
+  ],
   "metrics": {
     "rmse": 17.5,
     "mae": 15.2,
@@ -279,10 +384,23 @@ GET /predict?country=Senegal&model=random_forest&horizon=14
   },
   "predictions": [
     {
-      "date": "2025-08-28",
-      "prediction": 261
+      "date": "2024-08-28",
+      "prediction": 34.27
     }
-  ]
+  ],
+  "country_config": {
+    "continent": "Africa",
+    "population_density_threshold": 83,
+    "gdp_per_capita_range": [1000, 2000],
+    "vaccination_lag": 30,
+    "seasonal_factor": true,
+    "recommended_model": "random_forest"
+  },
+  "model_info": {
+    "name": "Forêt Aléatoire",
+    "description": "Modèle ensembliste robuste aux valeurs aberrantes",
+    "best_for": ["données complexes", "relations non-linéaires"]
+  }
 }
 ```
 
@@ -362,7 +480,7 @@ npx vercel --prod
 
 ```bash
 # Créer Procfile
-echo "web: python simple_app.py" > Procfile
+echo "web: python app.py" > Procfile
 
 # Configuration Heroku
 heroku create owid-predictor-api
@@ -371,6 +489,10 @@ git push heroku main
 # Variables d'environnement
 heroku config:set FLASK_ENV=production
 heroku config:set PORT=5000
+
+# Ajouter Java pour Apache Spark
+heroku buildpacks:add --index 1 heroku/python
+heroku buildpacks:add --index 2 heroku/java
 ```
 
 ### 🐳 Docker (Alternative)
@@ -382,8 +504,8 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 COPY . .
-EXPOSE 5001
-CMD ["python", "simple_app.py"]
+EXPOSE 5000
+CMD ["python", "app.py"]
 ```
 
 ---
@@ -403,13 +525,26 @@ npm test -- --coverage
 npm test -- --watch
 ```
 
+### 🌐 Tests Internationalisation
+
+```bash
+# Tester les traductions
+# Vérifier les fichiers dans public/locales/
+# Basculer entre FR/EN via l'interface
+# Tester la détection automatique de langue
+```
+
 ### 🔍 Tests API Backend
 
 ```bash
 # Test des endpoints
-curl "http://localhost:5001/health"
-curl "http://localhost:5001/countries"
-curl "http://localhost:5001/predict?country=Senegal&model=random_forest&horizon=7"
+curl "http://localhost:5000/health"
+curl "http://localhost:5000/countries"
+curl "http://localhost:5000/predict?country=Senegal&model=random_forest&horizon=7"
+curl "http://localhost:5000/predict_all?model=linear&horizon=7"
+
+# Test avec données de fallback (serveur éteint)
+# L'application doit fonctionner en mode offline
 ```
 
 ### 📊 Métriques de Performance
@@ -435,7 +570,7 @@ curl "http://localhost:5001/predict?country=Senegal&model=random_forest&horizon=
 
 ```bash
 # Vérifier les ports
-Backend: http://localhost:5001 ✓
+Backend: http://localhost:5000 ✓
 Frontend: http://localhost:3000 ✓
 
 # Redémarrer les serveurs si nécessaire
@@ -445,11 +580,11 @@ Frontend: http://localhost:3000 ✓
 
 ```bash
 # Windows: Trouver et tuer le processus
-netstat -ano | findstr :5001
+netstat -ano | findstr :5000
 taskkill /PID <PID> /F
 
-# Alternative: Changer de port
-python -c "from simple_app import app; app.run(port=5002)"
+# Alternative: Changer de port dans app.py
+python -c "from app import app; app.run(port=5002)"
 ```
 
 #### **Modules Python Manquants**
@@ -475,6 +610,16 @@ npm start
 
 ## 📞 Support et Contribution
 
+### 🆕 Nouvelles Fonctionnalités (Version 2.0)
+
+- ✨ **Internationalisation complète** - Interface en français et anglais
+- 🌐 **Détection automatique de langue** - Basée sur les préférences du navigateur
+- 🔄 **Mode hors-ligne robuste** - Données de fallback et prédictions simulées
+- 📊 **Métriques enrichies** - Plus de features pour les modèles ML
+- 🎨 **Interface améliorée** - Composants LanguageSwitcher et BackgroundElements
+- ⚡ **Gestion d'erreurs avancée** - Fallback gracieux et notifications utilisateur
+- 🔧 **Configuration par pays étendue** - 10 configurations spécialisées détaillées
+
 ### 🤝 Comment Contribuer
 
 1. **Fork** le projet
@@ -489,6 +634,10 @@ npm start
 - [Framer Motion](https://framer.com/motion)
 - [Tailwind CSS](https://tailwindcss.com/docs)
 - [Flask Documentation](https://flask.palletsprojects.com)
+- [Apache Spark PySpark](https://spark.apache.org/docs/latest/api/python/)
+- [i18next Documentation](https://www.i18next.com/)
+- [React i18next](https://react.i18next.com/)
+- [Our World in Data](https://ourworldindata.org/coronavirus)
 
 ### 🐞 Signaler un Bug
 
@@ -504,6 +653,14 @@ Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
 
 ## 🏆 Crédits
 
-Développé avec ❤️ pour la prédiction intelligente des cas COVID-19, avec des optimisations spéciales pour le Sénégal et l'Afrique de l'Ouest.
+Développé avec ❤️ pour la prédiction intelligente des cas COVID-19, avec des optimisations spéciales pour 10 pays stratégiques incluant 5 pays africains (Sénégal, Nigeria, Kenya, Afrique du Sud, Maroc) et 5 pays développés.
 
-**Technologies clés:** React • Flask • Framer Motion • Tailwind CSS • scikit-learn • Recharts
+**Technologies clés:** React • Flask • Apache Spark • Framer Motion • Tailwind CSS • PySpark ML • Recharts
+
+**Données:** Our World in Data (OWID) - Plus de 429,000+ enregistrements COVID-19 avec 67 variables détaillées
+
+**Optimisations régionales:** Modèles spécialisés par continent avec configurations adaptées aux caractéristiques épidémiologiques et socio-économiques de chaque région.
+
+**Langues supportées:** 🇫🇷 Français • 🇺🇸 English - Interface complètement internationalisée avec détection automatique
+
+**Architecture moderne:** Mode SPA React avec fallback offline, animations fluides Framer Motion, et backend Spark haute performance

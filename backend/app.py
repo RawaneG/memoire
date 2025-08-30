@@ -11,7 +11,7 @@ par pays, notamment pour le Sénégal.
 """
 
 from flask import Flask, request, jsonify
-from spark_model import predict_cases, get_available_countries, COUNTRY_CONFIGS
+from spark_model import predict_cases, get_available_countries, COUNTRY_CONFIGS, predict_all_configured_countries, get_configured_countries
 import logging
 
 # Configuration du logging
@@ -75,7 +75,7 @@ def predict():
     if not country:
         return jsonify({
             'error': 'Paramètre "country" requis',
-            'available_countries_sample': ['Senegal', 'France', 'Germany', 'United States']
+            'available_countries_sample': ['Senegal', 'Nigeria', 'South Africa', 'Kenya', 'Morocco', 'France', 'Germany', 'United Kingdom', 'United States', 'Canada']
         }), 400
         
     if model not in AVAILABLE_MODELS:
@@ -155,6 +155,51 @@ def countries():
         return jsonify({'error': str(exc)}), 500
 
 
+@app.route('/predict_all', methods=['GET'])
+def predict_all():
+    """Endpoint pour générer des prédictions pour tous les pays configurés.
+
+    Paramètres de requête :
+      - model : type de modèle ("linear", "random_forest", "gradient_boost")
+      - horizon : nombre de jours à prédire (1-30, défaut: 7)
+
+    Retour : JSON avec prédictions pour tous les pays configurés
+    """
+    model = request.args.get('model', default='linear')
+    horizon = request.args.get('horizon', 7, type=int)
+    
+    # Validation des paramètres
+    if model not in AVAILABLE_MODELS:
+        return jsonify({
+            'error': f'Modèle "{model}" non supporté',
+            'available_models': list(AVAILABLE_MODELS.keys())
+        }), 400
+        
+    if not (1 <= horizon <= 30):
+        return jsonify({
+            'error': 'Horizon doit être entre 1 et 30 jours'
+        }), 400
+    
+    try:
+        logger.info(f"Prédiction pour tous les pays configurés avec modèle {model}, horizon {horizon} jours")
+        
+        result = predict_all_configured_countries(
+            model_type=model, 
+            horizon=horizon,
+            data_path='owid-covid-data-sample.csv'
+        )
+        
+        logger.info(f"Prédiction réussie pour {len(result['predictions_by_country'])} pays")
+        return jsonify(result)
+        
+    except Exception as exc:
+        logger.error(f"Erreur lors de la prédiction groupée: {str(exc)}")
+        return jsonify({
+            'error': 'Erreur interne du serveur',
+            'details': str(exc)
+        }), 500
+
+
 @app.route('/models', methods=['GET'])
 def models():
     """Retourne la liste des modèles ML disponibles avec leurs descriptions."""
@@ -162,9 +207,18 @@ def models():
         'available_models': AVAILABLE_MODELS,
         'default_model': 'linear',
         'recommended_by_country': {
-            'Senegal': 'random_forest',  # Meilleur pour pays en développement
-            'France': 'gradient_boost',   # Plus de données disponibles
-            'Germany': 'gradient_boost'
+            # African Countries
+            'Senegal': 'random_forest',
+            'Nigeria': 'random_forest',
+            'South Africa': 'gradient_boost',
+            'Kenya': 'random_forest',
+            'Morocco': 'gradient_boost',
+            # Other Countries
+            'France': 'gradient_boost',
+            'Germany': 'gradient_boost',
+            'United Kingdom': 'gradient_boost',
+            'United States': 'gradient_boost',
+            'Canada': 'gradient_boost'
         }
     })
 
@@ -186,7 +240,8 @@ def home():
     return jsonify({
         'message': 'API de Prédiction COVID-19 OWID',
         'endpoints': {
-            '/predict': 'POST/GET - Générer des prédictions pour un pays',
+            '/predict': 'GET - Générer des prédictions pour un pays',
+            '/predict_all': 'GET - Générer des prédictions pour tous les pays configurés',
             '/countries': 'GET - Liste des pays disponibles', 
             '/models': 'GET - Liste des modèles ML disponibles',
             '/health': 'GET - Statut du service'
