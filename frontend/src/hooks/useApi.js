@@ -51,14 +51,14 @@ export const useApi = () => {
   const request = useCallback(async (endpoint, options = {}) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const url = `${API_BASE_URL}${endpoint}`;
-      
+
       // Create AbortController for timeout
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-      
+
       const response = await fetch(url, {
         headers: {
           'Content-Type': 'application/json',
@@ -67,7 +67,7 @@ export const useApi = () => {
         signal: controller.signal,
         ...options,
       });
-      
+
       clearTimeout(timeoutId);
 
       if (!response.ok) {
@@ -84,19 +84,25 @@ export const useApi = () => {
       return data;
     } catch (err) {
       if (err.name === 'AbortError') {
+        // timeout / abort: log but do not set the global error state so UI
+        // doesn't permanently show an error for transient timeouts (e.g. cold start)
         console.warn(`API request timed out for ${endpoint}. Using fallback data.`);
       } else {
         console.warn(`API request failed: ${err.message}. Using fallback data.`);
+        // Only set the global error state for non-abort errors
+        setError(err.message);
       }
-      
-      // Return fallback data based on endpoint
+
+      // Return fallback data for endpoints we have explicit fallbacks for
       if (endpoint === '/countries') {
         return FALLBACK_DATA.countries;
       } else if (endpoint === '/models') {
         return FALLBACK_DATA.models;
       }
-      
-      setError(err.message);
+
+      // For other endpoints (like /predict), rethrow so the caller can
+      // generate mock data or handle the failure without the hook forcing
+      // an error UI for abort/timeouts.
       throw err;
     } finally {
       setLoading(false);
@@ -110,31 +116,31 @@ export const useApi = () => {
       horizon: horizon.toString(),
       data_path: 'owid-covid-data-sample.csv',
     });
-    
+
     try {
       return await request(`/predict?${params}`);
     } catch (err) {
       // Generate mock prediction data when backend is unavailable
       console.warn('Backend unavailable, generating mock prediction data');
       console.error('Detailed error:', err);
-      
+
       const mockPredictions = [];
       const baseValue = Math.floor(Math.random() * 1000) + 100;
       const today = new Date();
-      
+
       for (let i = 0; i < horizon; i++) {
         const date = new Date(today);
         date.setDate(today.getDate() + i + 1);
-        
+
         const variation = (Math.random() - 0.5) * 0.2; // ±10% variation
         const prediction = Math.max(0, Math.floor(baseValue * (1 + variation)));
-        
+
         mockPredictions.push({
           date: date.toISOString().split('T')[0],
           prediction: prediction
         });
       }
-      
+
       return {
         country: country,
         model_type: model,
