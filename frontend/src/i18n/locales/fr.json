@@ -13,7 +13,7 @@
     "subtitle": "Choisissez un pays pour les prédictions COVID-19",
     "searchPlaceholder": "Rechercher un pays...",
     "noResults": "Aucun pays trouvé correspondant à",
-    "featuredCountries": "Pays en Vedette", 
+    "featuredCountries": "Pays en Vedette",
     "otherCountries": "Autres Pays",
     "specialConfig": "Configuration Spéciale",
     "totalCountries": "pays disponibles",
@@ -25,7 +25,7 @@
     "subtitle": "Sélectionnez l'algorithme d'apprentissage automatique",
     "recommended": "Recommandé",
     "complexity": "Complexité",
-    "accuracy": "Précision", 
+    "accuracy": "Précision",
     "speed": "Vitesse",
     "selectModel": "Sélectionnez un modèle",
     "bestFor": "Idéal pour",
@@ -40,7 +40,7 @@
     },
     "models": {
       "linear": {
-        "name": "Régression Linéaire", 
+        "name": "Régression Linéaire",
         "description": "Simple, rapide et interprétable",
         "bestFor": "Idéal pour les données limitées et les tendances linéaires"
       },
@@ -67,13 +67,13 @@
     "confidenceRange": "Plage de Confiance",
     "range": "Plage",
     "minimum": "Minimum",
-    "maximum": "Maximum", 
+    "maximum": "Maximum",
     "average": "Moyenne",
     "total": "Total",
     "metrics": {
       "title": "Métriques du Modèle",
       "rmse": "RMSE",
-      "mae": "MAE", 
+      "mae": "MAE",
       "r2Score": "Score R²",
       "trainingSamples": "Échantillons d'Entraînement",
       "testSamples": "Échantillons de Test"
@@ -98,7 +98,7 @@
   },
   "processingSteps": {
     "fetchingData": "Récupération des données",
-    "processingFeatures": "Traitement des fonctionnalités", 
+    "processingFeatures": "Traitement des fonctionnalités",
     "trainingModel": "Entraînement du modèle",
     "generatingPredictions": "Génération des prédictions"
   },
@@ -173,7 +173,7 @@
   "formatting": {
     "numbers": {
       "thousand": "k",
-      "million": "M", 
+      "million": "M",
       "billion": "G"
     },
     "dates": {
@@ -185,5 +185,25 @@
   "welcome": {
     "title": "Prêt à Prédire",
     "message": "Configurez vos paramètres à gauche et cliquez sur \"Prédire\" pour voir des prévisions COVID-19 avancées alimentées par ML."
+  },
+  "cleaningLevel": {
+    "title": "Niveau de Nettoyage",
+    "recommended": "Recommandé",
+    "footer": "Le niveau de nettoyage détermine comment les données aberrantes sont traitées",
+    "minimal": {
+      "name": "Minimal",
+      "description": "Remplace uniquement les valeurs NULL par 0",
+      "useCase": "Pour des données déjà nettoyées et de haute qualité"
+    },
+    "standard": {
+      "name": "Standard",
+      "description": "Suppression négatives + outliers >10x + lissage 7j",
+      "useCase": "Usage général, bon équilibre précision/conservation"
+    },
+    "strict": {
+      "name": "Strict",
+      "description": "Outliers >5x + lissage strict + validation renforcée",
+      "useCase": "Pour des données brutes avec beaucoup d'anomalies"
+    }
   }
 }

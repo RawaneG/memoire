@@ -69,42 +69,53 @@ def predict():
     country = request.args.get('country')
     model = request.args.get('model', default='linear')
     horizon = request.args.get('horizon', 14, type=int)
+    cleaning_level = request.args.get('cleaning_level', default='standard')
     data_path = request.args.get('data_path', 'owid-covid-data.csv')
-    
+
     # Validation des paramètres
     if not country:
         return jsonify({
-            'error': 'Paramètre "country" requis',
+            'error': t('api.errors.country_required', lang=lang),
             'available_countries_sample': ['Senegal', 'Nigeria', 'South Africa', 'Kenya', 'Morocco', 'France', 'Germany', 'United Kingdom', 'United States', 'Canada']
         }), 400
-        
-    if model not in AVAILABLE_MODELS:
+
+    if model not in AVAILABLE_MODEL_TYPES:
         return jsonify({
-            'error': f'Modèle "{model}" non supporté',
-            'available_models': list(AVAILABLE_MODELS.keys())
+            'error': t('api.errors.model_not_supported', model=model, lang=lang),
+            'available_models': AVAILABLE_MODEL_TYPES
         }), 400
-        
+
     if not (1 <= horizon <= 30):
         return jsonify({
-            'error': 'Horizon doit être entre 1 et 30 jours'
+            'error': t('api.errors.horizon_range', lang=lang)
         }), 400
-    
+
+    if cleaning_level not in ['minimal', 'standard', 'strict']:
+        return jsonify({
+            'error': t('api.errors.cleaning_level_invalid', lang=lang) if 'cleaning_level_invalid' in dir() else f'Cleaning level must be "minimal", "standard", or "strict"',
+            'available_levels': ['minimal', 'standard', 'strict']
+        }), 400
+
     try:
-        logger.info(f"Prédiction pour {country} avec modèle {model}, horizon {horizon} jours")
-        
+        logger.info(t('api.messages.prediction_start', country=country, model=model, horizon=horizon, lang=lang))
+
         result = predict_cases(
-            country=country, 
-            model_type=model, 
+            country=country,
+            model_type=model,
             horizon=horizon,
-            data_path=data_path
+            data_path=data_path,
+            lang=lang,
+            cleaning_level=cleaning_level
         )
         
         # Enrichir la réponse avec des informations sur le modèle
-        result['model_info'] = AVAILABLE_MODELS[model]
+        result['model_info'] = get_models_translated(lang)[model]
         result['request_params'] = {
             'country': country,
-            'model': model, 
-            'horizon': horizon
+            'model': model,
+            'horizon': horizon,
+            'cleaning_level': cleaning_level,
+            'lang': lang
         }
         
         logger.info(f"Prédiction réussie - RMSE: {result['metrics']['rmse']:.2f}")

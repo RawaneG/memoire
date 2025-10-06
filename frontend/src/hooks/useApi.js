@@ -109,11 +109,13 @@ export const useApi = () => {
     }
   }, []);
 
-  const predict = useCallback(async (country, model, horizon) => {
+  const predict = useCallback(async (country, model, horizon, cleaningLevel = 'standard', lang = 'fr') => {
     const params = new URLSearchParams({
       country,
       model,
       horizon: horizon.toString(),
+      cleaning_level: cleaningLevel,
+      lang,
       data_path: 'owid-covid-data-sample.csv',
     });
 
@@ -145,6 +147,7 @@ export const useApi = () => {
         country: country,
         model_type: model,
         horizon_days: horizon,
+        cleaning_level: cleaningLevel,
         training_samples: 1200,
         test_samples: 300,
         features_used: ['cases_lag_1', 'cases_lag_7', 'deaths_lag_1', 'seasonal_sin'],

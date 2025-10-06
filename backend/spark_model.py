@@ -136,16 +136,22 @@ def create_country_specific_features(df_country, country: str):
     
     return df_features
 
-def predict_cases(country: str, model_type: str = 'linear', horizon: int = 14, 
-                 data_path: str = "owid-covid-data.csv") -> Dict:
+def predict_cases(country: str, model_type: str = 'linear', horizon: int = 14,
+                 data_path: str = "owid-covid-data.csv", lang: str = 'fr',
+                 cleaning_level: str = 'standard') -> Dict:
     """Prédit les cas COVID-19 pour un pays donné avec des modèles ML.
-    
+
     Args:
         country: Nom du pays (ex: 'Senegal', 'France')
         model_type: Type de modèle ('linear', 'random_forest', 'gradient_boost')
         horizon: Nombre de jours à prédire
         data_path: Chemin vers le fichier de données OWID
-        
+        lang: Langue pour les messages ('fr' ou 'en')
+        cleaning_level: Niveau de nettoyage ('minimal', 'standard', 'strict')
+            - minimal: Remplace NULL par 0 uniquement
+            - standard: + suppression négatives + outliers >10x + lissage 7j
+            - strict: + outliers >5x + lissage + validation stricte
+
     Returns:
         Dict contenant les prédictions et métriques du modèle
     """
@@ -176,10 +182,12 @@ def predict_cases(country: str, model_type: str = 'linear', horizon: int = 14,
         # Créer des features spécifiques au pays
         df_country = create_country_specific_features(df_country, country)
 
-        # Créer des variables de décalage améliorées
+        # =================================================================
+        # NETTOYAGE DES DONNÉES - Niveaux configurables
+        # =================================================================
         window_spec = Window.orderBy("date")
-        
-        # Remplacer les valeurs nulles par des moyennes ou zéros
+
+        # NIVEAU MINIMAL : Toujours appliqué (remplacer NULL par 0)
         df_clean = df_country.fillna({
             'new_cases': 0,
             'new_deaths': 0,
@@ -188,7 +196,53 @@ def predict_cases(country: str, model_type: str = 'linear', horizon: int = 14,
             'total_cases': 0,
             'total_deaths': 0
         })
-        
+
+        # NIVEAU STANDARD et STRICT : Nettoyage avancé
+        if cleaning_level in ['standard', 'strict']:
+            # Supprimer les valeurs négatives (erreurs de saisie)
+            df_clean = df_clean.filter(
+                (col('new_cases') >= 0) &
+                (col('new_deaths') >= 0)
+            )
+
+            if 'new_vaccinations' in df_clean.columns:
+                df_clean = df_clean.filter(col('new_vaccinations') >= 0)
+
+            # Filtrer les valeurs aberrantes extrêmes
+            try:
+                median_cases = df_clean.approxQuantile("new_cases", [0.5], 0.01)[0]
+                if median_cases > 0:
+                    # Standard: >10x médiane, Strict: >5x médiane
+                    multiplier = 5 if cleaning_level == 'strict' else 10
+                    df_clean = df_clean.filter(col('new_cases') <= median_cases * multiplier)
+                    logging.info(t('data_cleaning.median_info', median=median_cases,
+                                 max_limit=median_cases * multiplier, lang=lang))
+            except Exception as e:
+                logging.warning(t('data_cleaning.median_error', error=str(e), lang=lang))
+
+            # Lissage sur 7 jours
+            window_7 = Window.orderBy("date").rowsBetween(-3, 3)
+            df_clean = df_clean.withColumn(
+                "cases_7d_avg",
+                spark_mean("new_cases").over(window_7)
+            )
+
+            # Standard: >5x moyenne, Strict: >3x moyenne
+            threshold = 3 if cleaning_level == 'strict' else 5
+            df_clean = df_clean.withColumn(
+                "new_cases_cleaned",
+                when(
+                    (col("new_cases") > threshold * col("cases_7d_avg")) & (col("cases_7d_avg") > 0),
+                    col("cases_7d_avg")
+                ).otherwise(col("new_cases"))
+            )
+
+            df_clean = df_clean.withColumn("new_cases", col("new_cases_cleaned")).drop("new_cases_cleaned", "cases_7d_avg")
+
+        # =================================================================
+        # CRÉATION DES FEATURES
+        # =================================================================
+
         # Variables de décalage multiples pour capturer les tendances
         df_lag = (
             df_clean
@@ -226,8 +280,10 @@ def predict_cases(country: str, model_type: str = 'linear', horizon: int = 14,
         df_lag = df_lag.dropna(subset=feature_cols, how='all')
         
         # Vérifier que nous avons encore des données après le preprocessing
-        if df_lag.count() < 20:
-            raise ValueError(f"Données insuffisantes pour {country} après preprocessing. Seulement {df_lag.count()} lignes disponibles.")
+        count = df_lag.count()
+        min_rows = 30 if cleaning_level == 'strict' else 20
+        if count < min_rows:
+            raise ValueError(t('data_cleaning.insufficient_after_preprocessing', country=country, count=count, lang=lang))
 
         # Assembler les features disponibles
         assembler = VectorAssembler(
@@ -324,6 +380,7 @@ def predict_cases(country: str, model_type: str = 'linear', horizon: int = 14,
             "country": country,
             "model_type": model_type,
             "horizon_days": horizon,
+            "cleaning_level": cleaning_level,
             "training_samples": train_df.count(),
             "test_samples": test_df.count(),
             "features_used": feature_cols,
