@@ -62,10 +62,15 @@ def predict():
       - country : nom du pays (ex. "Senegal", "France")
       - model : type de modèle ("linear", "random_forest", "gradient_boost")
       - horizon : nombre de jours à prédire (1-30, défaut: 14)
+      - cleaning_level : niveau de nettoyage ("minimal", "standard", "strict")
+      - lang : langue ("fr", "en")
       - data_path : chemin vers les données (optionnel)
 
     Retour : JSON avec prédictions et métriques du modèle
     """
+    lang = get_lang_from_request()
+    set_language(lang)
+
     country = request.args.get('country')
     model = request.args.get('model', default='linear')
     horizon = request.args.get('horizon', 14, type=int)

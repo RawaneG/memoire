@@ -56,8 +56,10 @@ export const useApi = () => {
       const url = `${API_BASE_URL}${endpoint}`;
 
       // Create AbortController for timeout
+      // Use longer timeout for all endpoints to accommodate Spark cold start
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      const timeout = endpoint === '/health' ? 5000 : 60000; // 60s for all except health check
+      const timeoutId = setTimeout(() => controller.abort(), timeout);
 
       const response = await fetch(url, {
         headers: {
