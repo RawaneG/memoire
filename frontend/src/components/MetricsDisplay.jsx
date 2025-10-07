@@ -39,7 +39,14 @@ const MetricsDisplay = ({ predictions }) => {
     return { text: t('metricsDisplay.performanceLevels.poor'), color: 'text-red-400' };
   };
 
-  const performance = getPerformanceDescription(metrics.r2_score);
+  // Prefer normalized R² from backend; otherwise clamp raw value to [0,1]
+  const clamp01 = (v) => Math.max(0, Math.min(1, v ?? 0));
+  const rawR2 = metrics?.r2_score;
+  const r2Normalized = typeof metrics?.r2_score_normalized === 'number'
+    ? metrics.r2_score_normalized
+    : clamp01(rawR2 ?? 0);
+
+  const performance = getPerformanceDescription(r2Normalized);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -82,10 +89,15 @@ const MetricsDisplay = ({ predictions }) => {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <span className="text-white/80 text-sm">{t('predictionChart.metrics.r2Score')}</span>
-            <div className={`px-3 py-1 rounded-full border text-sm font-bold ${getScoreColor(metrics.r2_score, 'r2')}`}>
-              {(metrics.r2_score * 100).toFixed(1)}%
+            <div className={`px-3 py-1 rounded-full border text-sm font-bold ${getScoreColor(r2Normalized, 'r2')}`}>
+              {(r2Normalized * 100).toFixed(1)}%
             </div>
           </div>
+          {typeof rawR2 === 'number' && rawR2 < 0 && (
+            <div className="text-[11px] text-white/50 mt-1">
+              {t('metricsDisplay.rawR2Negative')} · {t('metricsDisplay.adjustedR2Note')}
+            </div>
+          )}
           
           <div className="flex items-center justify-between">
             <span className="text-white/80 text-sm">{t('metricsDisplay.performance')}</span>
@@ -99,7 +111,7 @@ const MetricsDisplay = ({ predictions }) => {
             <motion.div
               className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full"
               initial={{ width: 0 }}
-              animate={{ width: `${metrics.r2_score * 100}%` }}
+              animate={{ width: `${r2Normalized * 100}%` }}
               transition={{ duration: 1.5, delay: 0.5 }}
             />
           </div>

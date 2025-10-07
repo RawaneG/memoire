@@ -125,7 +125,9 @@
       "good": "Good",
       "fair": "Fair",
       "poor": "Poor"
-    }
+    },
+    "rawR2Negative": "Negative raw R²",
+    "adjustedR2Note": "clipped to 0% for readability"
   },
   "horizon": {
     "title": "Prediction Horizon",

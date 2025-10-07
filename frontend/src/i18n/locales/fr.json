@@ -125,7 +125,9 @@
       "good": "Bon",
       "fair": "Correct",
       "poor": "Mauvais"
-    }
+    },
+    "rawR2Negative": "R² brut négatif",
+    "adjustedR2Note": "valeur plafonnée à 0% pour une meilleure lisibilité"
   },
   "horizon": {
     "title": "Horizon de Prédiction",
