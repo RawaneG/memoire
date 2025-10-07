@@ -11,7 +11,8 @@ import {
   CheckCircle,
   Activity,
   Calendar,
-  Target
+  Target,
+  Filter
 } from 'lucide-react';
 
 // Components
@@ -23,6 +24,7 @@ import ModelSelector from './components/ModelSelector';
 import MetricsDisplay from './components/MetricsDisplay';
 import OfflineNotice from './components/OfflineNotice';
 import LanguageSwitcher from './components/LanguageSwitcher';
+import CleaningLevelSelector from './components/CleaningLevelSelector';
 
 // Hooks
 import { useApi } from './hooks/useApi';
@@ -32,13 +34,14 @@ const App = () => {
   const [country, setCountry] = useState('Senegal');
   const [model, setModel] = useState('random_forest');
   const [horizon, setHorizon] = useState(14);
+  const [cleaningLevel, setCleaningLevel] = useState('standard');
   const [predictions, setPredictions] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [activeDropdown, setActiveDropdown] = useState(null);
 
   const { loading, error, predict, clearError } = useApi();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   // Animation variants
   const containerVariants = {
@@ -83,7 +86,7 @@ const App = () => {
     }
 
     try {
-      const result = await predict(country, model, horizon);
+      const result = await predict(country, model, horizon, cleaningLevel, i18n.language);
       setPredictions(result);
     } catch (err) {
       console.error('Prediction failed:', err);
@@ -234,6 +237,20 @@ const App = () => {
                         country={country}
                         onToggle={handleDropdownToggle}
                         shouldClose={shouldCloseDropdown('model')}
+                      />
+                    </div>
+
+                    {/* Cleaning Level Selection */}
+                    <div>
+                      <label className="block text-sm font-semibold text-white/80 mb-3">
+                        <Filter className="w-4 h-4 inline mr-2" />
+{t('cleaningLevel.title')}
+                      </label>
+                      <CleaningLevelSelector
+                        value={cleaningLevel}
+                        onChange={setCleaningLevel}
+                        onToggle={handleDropdownToggle}
+                        shouldClose={shouldCloseDropdown('cleaning')}
                       />
                     </div>
 

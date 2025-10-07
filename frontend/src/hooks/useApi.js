@@ -48,6 +48,18 @@ export const useApi = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // New: wait for backend readiness (health endpoint) with retries
+  const waitForHealth = useCallback(async (retries = 3) => {
+    for (let attempt = 0; attempt < retries; attempt++) {
+      try {
+        const res = await fetch(`${API_BASE_URL}/health`); // no custom headers to reduce preflight
+        if (res.ok) return true;
+      } catch (_e) { }
+      await new Promise(r => setTimeout(r, 500 * Math.pow(2, attempt)));
+    }
+    return false;
+  }, []);
+
   const request = useCallback(async (endpoint, options = {}) => {
     setLoading(true);
     setError(null);
@@ -55,9 +67,9 @@ export const useApi = () => {
     try {
       const url = `${API_BASE_URL}${endpoint}`;
 
-      // Create AbortController for timeout
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      const timeout = endpoint === '/health' ? 5000 : 60000; // 60s for prediction endpoints
+      const timeoutId = setTimeout(() => controller.abort(), timeout);
 
       const response = await fetch(url, {
         headers: {
@@ -83,102 +95,95 @@ export const useApi = () => {
       }
       return data;
     } catch (err) {
+      // Differentiate between network/CORS and server errors
       if (err.name === 'AbortError') {
-        // timeout / abort: log but do not set the global error state so UI
-        // doesn't permanently show an error for transient timeouts (e.g. cold start)
         console.warn(`API request timed out for ${endpoint}. Using fallback data.`);
+      } else if (err.message && (err.message.includes('Failed to fetch') || err.message.includes('NetworkError'))) {
+        console.warn(`Network/CORS error calling ${endpoint}: ${err.message}`);
       } else {
         console.warn(`API request failed: ${err.message}. Using fallback data.`);
-        // Only set the global error state for non-abort errors
         setError(err.message);
       }
 
-      // Return fallback data for endpoints we have explicit fallbacks for
       if (endpoint === '/countries') {
         return FALLBACK_DATA.countries;
       } else if (endpoint === '/models') {
         return FALLBACK_DATA.models;
       }
 
-      // For other endpoints (like /predict), rethrow so the caller can
-      // generate mock data or handle the failure without the hook forcing
-      // an error UI for abort/timeouts.
-      throw err;
+      throw err; // let caller decide for predict
     } finally {
       setLoading(false);
     }
   }, []);
 
-  const predict = useCallback(async (country, model, horizon) => {
+  const predict = useCallback(async (country, model, horizon, cleaningLevel = 'standard', lang = 'fr') => {
     const params = new URLSearchParams({
       country,
       model,
       horizon: horizon.toString(),
+      cleaning_level: cleaningLevel,
+      lang,
       data_path: 'owid-covid-data-sample.csv',
     });
+
+    // Ensure backend is warmed up first
+    await waitForHealth();
 
     try {
       return await request(`/predict?${params}`);
     } catch (err) {
-      // Generate mock prediction data when backend is unavailable
-      console.warn('Backend unavailable, generating mock prediction data');
-      console.error('Detailed error:', err);
+      // Retry once after a short delay (handles initial Spark warmup failure)
+      console.warn('Initial predict call failed, retrying once after 1s...', err);
+      await new Promise(r => setTimeout(r, 1000));
+      try {
+        return await request(`/predict?${params}`);
+      } catch (finalErr) {
+        console.warn('Second attempt failed, generating mock prediction data');
+        console.error('Detailed error:', finalErr);
 
-      const mockPredictions = [];
-      const baseValue = Math.floor(Math.random() * 1000) + 100;
-      const today = new Date();
+        const mockPredictions = [];
+        const baseValue = Math.floor(Math.random() * 1000) + 100;
+        const today = new Date();
 
-      for (let i = 0; i < horizon; i++) {
-        const date = new Date(today);
-        date.setDate(today.getDate() + i + 1);
+        for (let i = 0; i < horizon; i++) {
+          const date = new Date(today);
+          date.setDate(today.getDate() + i + 1);
 
-        const variation = (Math.random() - 0.5) * 0.2; // ±10% variation
-        const prediction = Math.max(0, Math.floor(baseValue * (1 + variation)));
+          const variation = (Math.random() - 0.5) * 0.2; // ±10% variation
+          const prediction = Math.max(0, Math.floor(baseValue * (1 + variation)));
 
-        mockPredictions.push({
-          date: date.toISOString().split('T')[0],
-          prediction: prediction
-        });
+          mockPredictions.push({
+            date: date.toISOString().split('T')[0],
+            prediction: prediction
+          });
+        }
+
+        return {
+          country: country,
+          model_type: model,
+          horizon_days: horizon,
+          cleaning_level: cleaningLevel,
+          training_samples: 1200,
+          test_samples: 300,
+          features_used: ['cases_lag_1', 'cases_lag_7', 'deaths_lag_1', 'seasonal_sin'],
+          metrics: {
+            rmse: 45.2 + Math.random() * 20,
+            mae: 32.1 + Math.random() * 15,
+            r2_score: 0.75 + Math.random() * 0.2,
+            r2_score_normalized: 0.75 + Math.random() * 0.2
+          },
+          predictions: mockPredictions,
+          model_info: FALLBACK_DATA.models.available_models[model] || FALLBACK_DATA.models.available_models.linear,
+          country_config: country === 'Senegal' ? 'Optimized for developing countries' : 'Default configuration'
+        };
       }
-
-      return {
-        country: country,
-        model_type: model,
-        horizon_days: horizon,
-        training_samples: 1200,
-        test_samples: 300,
-        features_used: ['cases_lag_1', 'cases_lag_7', 'deaths_lag_1', 'seasonal_sin'],
-        metrics: {
-          rmse: 45.2 + Math.random() * 20,
-          mae: 32.1 + Math.random() * 15,
-          r2_score: 0.75 + Math.random() * 0.2
-        },
-        predictions: mockPredictions,
-        model_info: FALLBACK_DATA.models.available_models[model] || FALLBACK_DATA.models.available_models.linear,
-        country_config: country === 'Senegal' ? 'Optimized for developing countries' : 'Default configuration'
-      };
     }
-  }, [request]);
+  }, [request, waitForHealth]);
 
-  const getCountries = useCallback(async () => {
-    return request('/countries');
-  }, [request]);
+  const getCountries = useCallback(async () => request('/countries'), [request]);
+  const getModels = useCallback(async () => request('/models'), [request]);
+  const getHealth = useCallback(async () => request('/health'), [request]);
 
-  const getModels = useCallback(async () => {
-    return request('/models');
-  }, [request]);
-
-  const getHealth = useCallback(async () => {
-    return request('/health');
-  }, [request]);
-
-  return {
-    loading,
-    error,
-    predict,
-    getCountries,
-    getModels,
-    getHealth,
-    clearError: () => setError(null),
-  };
+  return { loading, error, predict, getCountries, getModels, getHealth, clearError: () => setError(null) };
 };

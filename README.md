@@ -44,18 +44,19 @@ Le projet utilise un module de configuration centralisé pour gérer les URLs d'
 ```javascript
 const environments = {
   development: {
-    API_BASE_URL: 'http://localhost:5000',
+    API_BASE_URL: "http://localhost:5000",
   },
   production: {
-    API_BASE_URL: 'https://your-production-api.com',
+    API_BASE_URL: "https://your-production-api.com",
   },
   staging: {
-    API_BASE_URL: 'https://your-staging-api.com',
-  }
+    API_BASE_URL: "https://your-staging-api.com",
+  },
 };
 ```
 
 **Avantages:**
+
 - ✅ Configuration centralisée des URLs d'API
 - ✅ Basculement automatique selon `NODE_ENV`
 - ✅ Pas besoin de modifier le code pour changer d'environnement
@@ -158,15 +159,15 @@ OWID/
 
 #### Frontend
 
-| Technologie       | Version  | Usage                     |
-| ----------------- | -------- | ------------------------- |
-| **React**         | 18.2.0   | Framework UI principal    |
-| **Framer Motion** | 10.16.16 | Animations et transitions |
-| **Tailwind CSS**  | 3.3.6    | Framework CSS utilitaire  |
-| **Recharts**      | 2.8.0    | Visualisation de données  |
-| **Lucide React**  | 0.294.0  | Bibliothèque d'icônes     |
-| **i18next**       | 25.4.2   | Internationalisation      |
-| **react-i18next** | 15.7.3   | Intégration React i18n    |
+| Technologie       | Version  | Usage                               |
+| ----------------- | -------- | ----------------------------------- |
+| **React**         | 18.2.0   | Framework UI principal              |
+| **Framer Motion** | 10.16.16 | Animations et transitions           |
+| **Tailwind CSS**  | 3.3.6    | Framework CSS utilitaire            |
+| **Recharts**      | 2.8.0    | Visualisation de données            |
+| **Lucide React**  | 0.294.0  | Bibliothèque d'icônes               |
+| **i18next**       | 25.4.2   | Internationalisation                |
+| **react-i18next** | 15.7.3   | Intégration React i18n              |
 | **clsx**          | 2.0.0    | Gestion classes CSS conditionnelles |
 
 #### Backend
@@ -455,7 +456,104 @@ const containerVariants = {
 
 ---
 
-## 🚀 Déploiement Production
+## � Normalisation des Métriques (R²)
+
+### Pourquoi normaliser ?
+
+Le score R² brut (
+coefficient de détermination) peut devenir négatif lorsque le modèle performe moins bien qu'une simple moyenne naïve. Cela provoquait dans l'UI des pourcentages « -104.7% » peu lisibles.
+
+### Stratégie Implémentée
+
+- Le backend calcule toujours le `r2_score` brut via Spark ML.
+- Un champ supplémentaire `r2_score_normalized` est ajouté dans `metrics` :
+  - `r2_score_normalized = clamp(r2_score, 0.0, 1.0)`
+  - Valeur utilisée pour l'affichage (barre de progression + badge %).
+- Si le R² brut est négatif, une note contextuelle apparaît en UI: _« R² brut négatif – valeur plafonnée à 0% pour une meilleure lisibilité »_.
+
+### Avantages
+
+- ✅ UX plus propre (0–100%)
+- ✅ Diagnostic préservé (R² brut disponible si besoin futur d'export)
+- ✅ Évite de fausses interprétations utilisateur
+
+### Exemple de Payload API (extrait)
+
+```json
+{
+  "metrics": {
+    "rmse": 42.1,
+    "mae": 31.4,
+    "r2_score": -0.1479,
+    "r2_score_normalized": 0.0
+  }
+}
+```
+
+---
+
+## 🧭 Composants Dropdown Unifiés (Country / Model / Cleaning Level)
+
+### Objectifs
+
+- Harmonisation visuelle : accent vertical animé + glassmorphism.
+- Accessibilité clavier : navigation ↑ / ↓ / Home / End / Entrée / Échap.
+- Respect de `prefers-reduced-motion`.
+- Micro-interactions cohérentes (hover, focus, sélection, recommandation).
+
+### Fonctionnalités Clés
+
+| Composant             | Accent dynamique          | Clavier | Tooltip / Info            | Reduced Motion | Badge Recommandé    |
+| --------------------- | ------------------------- | ------- | ------------------------- | -------------- | ------------------- |
+| CountrySelector       | Bar verticale gradient    | Oui     | Section labels            | Oui            | Pays optimisés      |
+| ModelSelector         | Bar verticale gradient    | Oui     | Specs (complexity, speed) | Oui            | Modèle recommandé   |
+| CleaningLevelSelector | Bar + gradient par niveau | Oui     | Tooltip use-case          | Oui            | Standard par défaut |
+
+### Patterns d'Animation
+
+| Élément            | Entrée                        | Sortie      | Hover                | Sélection              |
+| ------------------ | ----------------------------- | ----------- | -------------------- | ---------------------- |
+| Panel              | Fade + y:-6 (0.25s)           | Fade + y:-6 | Accent bar fade in   | Accent bar persistante |
+| Items              | Stagger léger (12ms \* index) | Fade + y:-2 | Légère translation x | Anneau + fond atténué  |
+| Tooltip (Cleaning) | Fade + (scale 0.98 → 1)       | Fade        | —                    | —                      |
+
+### Accessibilité
+
+- Rôles utilisés: `listbox`, `option`, attributs `aria-selected`, `aria-activedescendant`.
+- Focus retour automatisé au bouton déclencheur après sélection.
+- Tooltip marqué `role="note"`.
+- Footer informatif `aria-live="polite"` (extensible pour messages dynamiques).
+
+### Bonnes Pratiques Résumées
+
+- Limiter les animations complexes sur l'ouverture (latence perçue < 300ms).
+- Conserver une hiérarchie visuelle claire : featured ≠ others (luminance + densité).
+- Offrir un chemin clair de navigation sans souris.
+- Ne jamais bloquer la fermeture avec ESC + clic extérieur.
+
+### Extension Future (Suggestions)
+
+1. Extraction d'un hook `useAccessibleDropdown()` pour éliminer duplication.
+2. Support ARIA multi-sélection (si ajout de filtres combinés).
+3. Mode "compact" auto en dessous de 340px de hauteur viewport.
+
+---
+
+## 🛡️ Qualité & Observabilité (Roadmap)
+
+Non encore implémenté mais prévu :
+| Axe | Idée | Bénéfice |
+|-----|------|----------|
+| Monitoring | Ajout de métriques Prometheus côté backend | Suivi perf/erreurs |
+| Logging structuré | JSON logs (correlation id) | Debug amélioré |
+| Tests UI | Storybook + Chromatic visual diffs | Régression visuelle évitée |
+| Export | Endpoint `/export?country=...` CSV/Parquet | Intégration pipelines |
+
+---
+
+---
+
+## �🚀 Déploiement Production
 
 ### 🌐 Frontend (Vercel Recommandé)
 
