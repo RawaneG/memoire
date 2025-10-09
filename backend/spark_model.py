@@ -24,8 +24,17 @@ def get_spark(app_name: str = "OWIDPrediction") -> SparkSession:
             _SPARK_SESSION = (SparkSession.builder
                               .appName(app_name)
                               .config("spark.ui.showConsoleProgress", "false")
+                              # Optimisations mémoire pour Fly.io (768MB total)
+                              .config("spark.driver.memory", "400m")
+                              .config("spark.executor.memory", "256m")
+                              .config("spark.driver.maxResultSize", "100m")
+                              .config("spark.sql.shuffle.partitions", "4")  # Réduit de 200 par défaut
+                              .config("spark.default.parallelism", "2")
+                              .config("spark.sql.autoBroadcastJoinThreshold", "10485760")  # 10MB
+                              .config("spark.memory.fraction", "0.6")
+                              .config("spark.memory.storageFraction", "0.5")
                               .getOrCreate())
-            logging.info("[Spark] Session created")
+            logging.info("[Spark] Session created with optimized memory settings (768MB)")
     return _SPARK_SESSION
 
 def warmup_spark(data_path: str = "owid-covid-data-sample.csv"):
