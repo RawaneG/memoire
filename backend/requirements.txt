@@ -3,3 +3,4 @@ Flask-CORS>=4.0
 pyspark>=3.3
 pandas>=1.5
 numpy>=1.21
+gunicorn>=21.2.0
