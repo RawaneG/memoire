@@ -1,25 +1,62 @@
-# Ignore node_modules and other large files
+# Dependencies
 node_modules/
 frontend/node_modules/
+backend/venv/
 backend/__pycache__/
 *.pyc
 *.pyo
 *.pyd
 __pycache__/
-# Ignore cache and build artifacts
+
+# Environment variables
+.env
+.env.*
+.env.local
+.env.production
+.env.development
+backend/.env
+frontend/.env
+
+# Build outputs
 .cache/
 dist/
 build/
+frontend/build/
+frontend/dist/
+
+# Logs
 *.log
-# Ignore OS files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
 .DS_Store
 Thumbs.db
-# Ignore environment files
-.env
-.env.*
-# Ignore Jupyter Notebook checkpoints
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Jupyter Notebook checkpoints
 .ipynb_checkpoints/
-# Ignore LFS pointers for large files
+
+# Vercel
+.vercel
+
+# Testing
+coverage/
+.pytest_cache/
+
+# LFS pointers for large files
 *.pack
+
+# Claude
 .claude/
 .claude/settings.local.json
+
+# Data files (keep sample, ignore large datasets)
+backend/owid-covid-data.csv
+!backend/owid-covid-data-sample.csv

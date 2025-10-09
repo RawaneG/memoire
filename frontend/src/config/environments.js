@@ -3,10 +3,12 @@ const environments = {
     API_BASE_URL: 'http://localhost:5000',
   },
   production: {
-    API_BASE_URL: 'https://your-production-api.com',
+    // Cette URL sera remplacée par la variable d'environnement REACT_APP_API_URL
+    // ou vous devrez la mettre à jour manuellement après le déploiement Render
+    API_BASE_URL: process.env.REACT_APP_API_URL || 'https://owid-predictor-api.onrender.com',
   },
   staging: {
-    API_BASE_URL: 'https://your-staging-api.com',
+    API_BASE_URL: process.env.REACT_APP_API_URL || 'https://your-staging-api.com',
   }
 };
 
