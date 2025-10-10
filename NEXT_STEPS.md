@@ -4,24 +4,27 @@
 
 Tous les fichiers de déploiement ont été créés et configurés :
 
-### Fichiers Backend (Render)
+### Fichiers Backend
+
 - ✅ `backend/Procfile` - Configuration Gunicorn
-- ✅ `backend/render.yaml` - Configuration Render automatique
 - ✅ `backend/requirements.txt` - Ajout de Gunicorn
 - ✅ `backend/.env.example` - Template variables d'environnement
 
 ### Fichiers Frontend (Vercel)
-- ✅ `frontend/vercel.json` - Configuration Vercel
+
+- ✅ `frontend/vercel.json` - Configuration Vercel (sans bloc `env` ni `@api-url`)
 - ✅ `frontend/package.json` - Commandes de déploiement ajoutées
 - ✅ `frontend/src/config/environments.js` - Support REACT_APP_API_URL
 - ✅ `frontend/.env.example` - Template variables d'environnement
 
 ### GitHub Actions CI/CD
+
 - ✅ `.github/workflows/deploy.yml` - Déploiement automatique sur push
 - ✅ `.github/workflows/deploy-frontend.yml` - Déploiement frontend uniquement
 - ✅ `.github/workflows/deploy-backend.yml` - Déploiement backend uniquement
 
 ### Documentation
+
 - ✅ `DEPLOYMENT.md` - Guide complet de déploiement
 - ✅ `QUICK_START_DEPLOYMENT.md` - Guide rapide (5 minutes)
 - ✅ `.gitignore` - Mis à jour pour ignorer .env et fichiers de build
@@ -32,20 +35,12 @@ Tous les fichiers de déploiement ont été créés et configurés :
 
 ### 1. Créer les comptes (5 minutes)
 
-#### A. Render (Backend)
-1. Allez sur https://render.com
-2. Créez un compte (gratuit)
-3. Connectez votre GitHub
-4. Créez un nouveau **Web Service**:
-   - Repository: `RawaneG/memoire`
-   - Root Directory: `backend`
-   - Render détectera automatiquement `render.yaml` ✅
+#### A. Backend (hébergeur au choix)
 
-5. Récupérez les credentials:
-   - **RENDER_API_KEY**: Account Settings → API Keys → Create
-   - **RENDER_SERVICE_ID**: URL de votre service (ex: `srv-xxxxx`)
+Déployez l’API Flask sur la plateforme de votre choix (ex: Fly.io) et récupérez l’URL publique.
 
 #### B. Vercel (Frontend)
+
 ```bash
 # Installer Vercel CLI
 npm install -g vercel
@@ -57,6 +52,7 @@ vercel
 ```
 
 Suivez les instructions, puis récupérez:
+
 - **VERCEL_TOKEN**: vercel.com → Settings → Tokens → Create
 - **VERCEL_ORG_ID**: Dans l'URL `vercel.com/[org-id]/...`
 - **VERCEL_PROJECT_ID**: Project Settings → General
@@ -65,15 +61,9 @@ Suivez les instructions, puis récupérez:
 
 1. Allez sur https://github.com/RawaneG/memoire/settings/secrets/actions
 2. Cliquez sur **"New repository secret"**
-3. Ajoutez ces 5 secrets:
+3. Ajoutez ces secrets (si vous utilisez des workflows GitHub Actions):
 
 ```
-Nom: RENDER_API_KEY
-Valeur: [votre clé API Render]
-
-Nom: RENDER_SERVICE_ID
-Valeur: srv-xxxxx
-
 Nom: VERCEL_TOKEN
 Valeur: [votre token Vercel]
 
@@ -86,33 +76,38 @@ Valeur: [votre project ID]
 
 ### 3. Mettre à jour l'URL du backend (1 minute)
 
-Une fois le backend déployé sur Render, vous obtiendrez une URL comme:
-`https://owid-predictor-api.onrender.com`
+Une fois le backend déployé, vous obtiendrez une URL comme:
+`https://votre-backend.example.com`
 
 **Option A - Modifier le code:**
 Éditez `frontend/src/config/environments.js`:
+
 ```javascript
 production: {
-  API_BASE_URL: 'https://owid-predictor-api.onrender.com',
+   API_BASE_URL: 'https://votre-backend.example.com',
 }
 ```
 
 **Option B - Via Vercel (recommandé):**
+
 ```bash
 cd frontend
 vercel env add REACT_APP_API_URL production
-# Entrez: https://owid-predictor-api.onrender.com
+# Entrez: https://votre-backend.example.com
 ```
+
+> Note: Vercel n’utilise plus de "Secrets" référencés par `@...` dans `vercel.json`. Utilisez uniquement les Variables d’environnement de Projet.
 
 ### 4. Commit et Push ! 🎉
 
 ```bash
 git add .
-git commit -m "chore: setup deployment configuration for Vercel and Render"
+git commit -m "chore: setup deployment configuration pour Vercel"
 git push origin feature/real-owid-data-implementation
 ```
 
 Puis mergez votre branche dans `main`:
+
 ```bash
 git checkout main
 git merge feature/real-owid-data-implementation
@@ -125,19 +120,22 @@ git push origin main
 
 ## 📊 Vérifier le Déploiement
 
-### Backend (Render)
+### Backend
+
 ```bash
 # Tester le endpoint health
-curl https://votre-backend.onrender.com/health
+curl https://votre-backend.example.com/health
 
 # Devrait retourner:
 # {"status": "healthy", "service": "OWID COVID-19 Prediction API"}
 ```
 
 ### Frontend (Vercel)
+
 Ouvrez l'URL fournie par Vercel dans votre navigateur.
 
 ### GitHub Actions
+
 1. Allez sur https://github.com/RawaneG/memoire/actions
 2. Vous verrez les workflows en cours d'exécution
 3. Cliquez sur un workflow pour voir les logs
@@ -146,21 +144,19 @@ Ouvrez l'URL fournie par Vercel dans votre navigateur.
 
 ## 🔧 Dépannage Rapide
 
-### ❌ Backend crash sur Render (Out of Memory)
+### ❌ Backend instable / manque de mémoire
 
-**Cause:** Apache Spark utilise trop de RAM (plan gratuit = 512MB)
+**Cause:** Apache Spark utilise beaucoup de RAM.
 
-**Solution:**
-Éditez `backend/render.yaml`:
-```yaml
-startCommand: gunicorn simple_app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
-```
+**Solutions:**
 
-Utilisez `simple_app.py` au lieu de `app.py` (pas de Spark, mais fonctionne).
+- Utiliser `simple_app.py` au lieu de `app.py` (sans Spark)
+- Choisir un hébergeur avec plus de ressources (ex: Fly.io)
 
 ### ❌ GitHub Actions échoue
 
 **Vérifiez:**
+
 1. Tous les secrets sont bien configurés
 2. Les noms des secrets sont exacts (sensibles à la casse)
 3. Consultez les logs dans l'onglet Actions
@@ -168,27 +164,37 @@ Utilisez `simple_app.py` au lieu de `app.py` (pas de Spark, mais fonctionne).
 ### ❌ Frontend ne peut pas se connecter au Backend
 
 **Vérifiez:**
-1. L'URL du backend dans `environments.js`
+
+1. L'URL du backend dans `environments.js` (ou la variable `REACT_APP_API_URL` dans Vercel)
 2. Que le backend est bien déployé et accessible
-3. Les logs du backend sur Render
+3. Les logs du backend sur votre hébergeur
+
+### ❌ Build Vercel échoue (npm ERESOLVE / TypeScript)
+
+**Symptôme:** conflit de peer dependencies avec `react-scripts@5` et TypeScript >= 5.
+
+**Solution:** figez TypeScript à `4.9.5` dans `devDependencies` et `overrides` (déjà appliqué dans ce repo).
 
 ---
 
 ## 🎯 Commandes Utiles Après Configuration
 
 ### Déploiement Manuel Frontend
+
 ```bash
 cd frontend
 npm run deploy
 ```
 
 ### Déploiement via GitHub Actions
+
 1. GitHub → Actions
 2. Choisir le workflow désiré
 3. "Run workflow"
 
 ### Forcer un redéploiement Backend
-Sur Render Dashboard → Manual Deploy → Deploy latest commit
+
+Sur le dashboard de votre hébergeur → Manual Deploy → Deploy latest commit
 
 ---
 
@@ -203,7 +209,7 @@ Sur Render Dashboard → Manual Deploy → Deploy latest commit
 ## 🆘 Besoin d'aide ?
 
 Consultez les documentations officielles:
-- [Render Docs](https://render.com/docs)
+
 - [Vercel Docs](https://vercel.com/docs)
 - [GitHub Actions Docs](https://docs.github.com/en/actions)
 

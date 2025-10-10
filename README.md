@@ -574,9 +574,32 @@ npx vercel --prod
 }
 ```
 
+#### Variables d'environnement (sans Secrets Vercel)
+
+- Vercel n'utilise plus les "Secrets" historiques référencés par `@…`. Notre `vercel.json` n'embarque donc pas de clé `env` et ne référence plus `@api-url`.
+- Pour définir l'URL de l'API en production, ajoutez la variable de projet suivante dans Vercel:
+  - Clé: `REACT_APP_API_URL`
+  - Valeur: `https://votre-backend.exemple.com`
+  - Environnements: Production (et Preview/Development si besoin)
+
+Via CLI (depuis `frontend/`, projet lié):
+
+````bash
 ### 🖥️ Backend (Heroku)
 
 ```bash
+````
+
+Important:
+
+- Create React App injecte `REACT_APP_*` au moment du build. Après toute modification de variable, relancez un déploiement.
+- Si vous voyez encore des références `@api-url` dans des docs anciennes, ignorez-les: elles ne sont plus utilisées.
+
+#### Astuce build (npm ERESOLVE)
+
+Si le build Vercel échoue avec un conflit de dépendances lié à TypeScript et `react-scripts@5`, figez TypeScript sur `4.9.5` (déjà appliqué dans ce repo):
+
+```json
 # Créer Procfile
 echo "web: python app.py" > Procfile
 
@@ -585,13 +608,17 @@ heroku create owid-predictor-api
 git push heroku main
 
 # Variables d'environnement
+```
+
 heroku config:set FLASK_ENV=production
 heroku config:set PORT=5000
 
 # Ajouter Java pour Apache Spark
+
 heroku buildpacks:add --index 1 heroku/python
 heroku buildpacks:add --index 2 heroku/java
-```
+
+````
 
 ### 🐳 Docker (Alternative)
 
@@ -604,7 +631,7 @@ RUN pip install -r requirements.txt
 COPY . .
 EXPOSE 5000
 CMD ["python", "app.py"]
-```
+````
 
 ---
 

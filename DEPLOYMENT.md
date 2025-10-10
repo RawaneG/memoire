@@ -19,7 +19,7 @@ Ce guide vous explique comment déployer automatiquement le frontend et le backe
 
 1. **GitHub Account** - Pour héberger le code et CI/CD
 2. **Vercel Account** - Pour le frontend (gratuit)
-3. **Render Account** - Pour le backend (gratuit)
+3. **Compte Backend** - Hébergeur au choix (ex: Fly.io)
 
 ### Outils Locaux
 
@@ -33,36 +33,9 @@ git >= 2.0.0
 
 ## ⚙️ Configuration Initiale
 
-### 1. Configuration Backend (Render)
+### 1. Configuration Backend (Générique)
 
-#### A. Créer un Service sur Render
-
-1. Allez sur [render.com](https://render.com)
-2. Créez un compte ou connectez-vous
-3. Cliquez sur **"New +"** → **"Web Service"**
-4. Connectez votre repository GitHub
-5. Configuration du service:
-   - **Name**: `owid-predictor-api`
-   - **Root Directory**: `backend`
-   - **Runtime**: `Python 3`
-   - **Build Command**: `pip install -r requirements.txt`
-   - **Start Command**: `gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120`
-   - **Plan**: `Free`
-
-6. Variables d'environnement:
-   ```
-   FLASK_ENV=production
-   PYTHON_VERSION=3.9.18
-   ```
-
-7. Cliquez sur **"Create Web Service"**
-
-#### B. Récupérer les Credentials Render
-
-1. Allez dans **Account Settings** → **API Keys**
-2. Créez une nouvelle API Key
-3. Copiez votre `RENDER_API_KEY`
-4. Sur votre service, copiez le `Service ID` depuis l'URL (ex: `srv-xxxxx`)
+Déployez l'API Flask (`backend/`) sur l’hébergeur de votre choix (ex: Fly.io). Assurez‑vous d’obtenir une URL publique, par exemple: `https://votre-backend.example.com`.
 
 ### 2. Configuration Frontend (Vercel)
 
@@ -81,6 +54,7 @@ vercel
 ```
 
 Suivez les instructions:
+
 - Link to existing project? **No**
 - Project name: `owid-predictor`
 - In which directory is your code located? `./`
@@ -94,6 +68,7 @@ vercel env ls
 ```
 
 Ou depuis le dashboard Vercel:
+
 1. Allez sur [vercel.com/dashboard](https://vercel.com/dashboard)
 2. Sélectionnez votre projet
 3. **Settings** → **General**:
@@ -103,7 +78,7 @@ Ou depuis le dashboard Vercel:
    - Copiez le **VERCEL_TOKEN**
 5. Votre **ORG_ID** se trouve dans l'URL: `vercel.com/[org-id]/...`
 
-### 3. Configuration GitHub Secrets
+### 3. Configuration GitHub Secrets (optionnel)
 
 1. Allez sur votre repository GitHub
 2. **Settings** → **Secrets and variables** → **Actions**
@@ -111,9 +86,6 @@ Ou depuis le dashboard Vercel:
 4. Ajoutez les secrets suivants:
 
 ```
-RENDER_API_KEY=votre_render_api_key
-RENDER_SERVICE_ID=srv-xxxxx
-
 VERCEL_TOKEN=votre_vercel_token
 VERCEL_ORG_ID=votre_org_id
 VERCEL_PROJECT_ID=votre_project_id
@@ -121,23 +93,25 @@ VERCEL_PROJECT_ID=votre_project_id
 
 ### 4. Mettre à Jour l'URL du Backend
 
-Une fois votre backend déployé sur Render:
+Une fois votre backend déployé:
 
-1. Copiez l'URL de votre service (ex: `https://owid-predictor-api.onrender.com`)
+1. Copiez l'URL de votre service (ex: `https://votre-backend.example.com`)
 2. Mettez à jour `frontend/src/config/environments.js`:
 
 ```javascript
 production: {
-  API_BASE_URL: 'https://owid-predictor-api.onrender.com',
+   API_BASE_URL: 'https://votre-backend.example.com',
 }
 ```
 
-Ou configurez-le comme variable d'environnement sur Vercel:
+Ou configurez-le comme variable d'environnement sur Vercel (recommandé):
 
 ```bash
 vercel env add REACT_APP_API_URL production
-# Entrez: https://owid-predictor-api.onrender.com
+# Entrez: https://votre-backend.example.com
 ```
+
+> Remarque: Vercel n’utilise plus de "Secrets" séparés référencés par `@...` dans `vercel.json`. Utilisez uniquement les Variables d’Environnement du Projet.
 
 ---
 
@@ -182,35 +156,22 @@ npm run deploy
 npm run deploy:preview
 ```
 
-### Backend (Render)
+### Backend
 
-Le backend se déploie automatiquement à chaque push. Pour forcer un redéploiement:
-
-1. Allez sur le dashboard Render
-2. Sélectionnez votre service
-3. Cliquez sur **"Manual Deploy"** → **"Deploy latest commit"**
-
-Ou via l'API:
-
-```bash
-curl -X POST "https://api.render.com/v1/services/YOUR_SERVICE_ID/deploys" \
-  -H "Authorization: Bearer YOUR_RENDER_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"clearCache": false}'
-```
+Le déploiement dépend de votre hébergeur (voir leur documentation). La plupart proposent un déclenchement automatique à chaque push ou un “Manual Deploy”.
 
 ---
 
 ## 🔐 Variables d'Environnement
 
-### Backend (Render)
+### Backend
 
-Variables configurées sur Render Dashboard:
+Variables d’environnement typiques côté backend (à adapter à votre hébergeur):
 
 ```env
 FLASK_ENV=production
 PYTHON_VERSION=3.9.18
-PORT=[auto-généré]
+PORT=5000
 ```
 
 ### Frontend (Vercel)
@@ -218,7 +179,7 @@ PORT=[auto-généré]
 Variables configurées sur Vercel Dashboard ou via CLI:
 
 ```env
-REACT_APP_API_URL=https://owid-predictor-api.onrender.com
+REACT_APP_API_URL=https://votre-backend.example.com
 NODE_ENV=production
 ```
 
@@ -228,51 +189,60 @@ Pour ajouter via CLI:
 vercel env add REACT_APP_API_URL production
 ```
 
+### ⚠️ Conflit TypeScript (Build Vercel)
+
+Si le build échoue avec un message `ERESOLVE` lié à `react-scripts@5` et `typescript@>=5`, épinglez TypeScript à `4.9.5` dans `package.json`:
+
+```json
+{
+  "devDependencies": {
+    "typescript": "4.9.5"
+  },
+  "overrides": {
+    "typescript": "4.9.5"
+  }
+}
+```
+
 ---
 
 ## 🩺 Dépannage
 
-### ❌ Backend ne démarre pas sur Render
+### ❌ Backend ne démarre pas / OOM
 
-**Problème**: Out of Memory (OOM)
+Apache Spark utilise beaucoup de RAM. Solutions:
 
-**Solution**: Apache Spark utilise beaucoup de RAM. Sur le plan gratuit (512MB):
-
-1. Option 1 - Utiliser `simple_app.py`:
-   ```yaml
-   # Dans render.yaml
-   startCommand: gunicorn simple_app:app --bind 0.0.0.0:$PORT
-   ```
-
-2. Option 2 - Passer au plan payant (7$/mois pour 2GB RAM)
+1. Utiliser `simple_app.py` (sans Spark)
+2. Augmenter les ressources ou changer d’hébergeur (ex: Fly.io)
 
 ### ❌ Frontend ne se connecte pas au Backend
 
 **Problème**: CORS ou URL incorrecte
 
 **Solutions**:
+
 1. Vérifiez l'URL dans `environments.js`
 2. Vérifiez que le backend est bien déployé et accessible
-3. Testez l'endpoint: `https://votre-backend.onrender.com/health`
+3. Testez l'endpoint: `https://votre-backend.example.com/health`
 
 ### ❌ GitHub Actions échoue
 
 **Problème**: Secrets manquants ou incorrects
 
 **Solution**:
+
 1. Vérifiez que tous les secrets sont configurés dans GitHub
 2. Vérifiez l'orthographe des noms de secrets
 3. Consultez les logs d'erreur dans l'onglet Actions
 
-### 🐌 Backend lent sur le plan gratuit Render
+### 🐌 Backend lent (cold start)
 
-**Causes**:
-- Cold start: Render met en veille les services inactifs (15 min)
-- Première requête après réveil: ~30-60 secondes
+Selon l’hébergeur choisi, le service peut être mis en veille, rendant la première requête plus lente.
 
-**Solutions**:
-1. Passer au plan payant (pas de cold start)
-2. Utiliser un service de ping (ex: UptimeRobot) pour garder le service actif
+Solutions:
+
+1. Choisir une offre sans cold start ou augmenter les ressources
+2. Utiliser un service de ping (ex: UptimeRobot)
 3. Ajouter un message de chargement dans le frontend
 
 ### 📊 Monitoring
@@ -280,10 +250,11 @@ vercel env add REACT_APP_API_URL production
 #### Vérifier le statut du Backend
 
 ```bash
-curl https://votre-backend.onrender.com/health
+curl https://votre-backend.example.com/health
 ```
 
 Réponse attendue:
+
 ```json
 {
   "status": "healthy",
@@ -292,9 +263,9 @@ Réponse attendue:
 }
 ```
 
-#### Logs Backend (Render)
+#### Logs Backend
 
-1. Dashboard Render → Votre service
+1. Dashboard de votre hébergeur → Votre service
 2. Onglet **"Logs"**
 
 #### Logs Frontend (Vercel)
@@ -315,13 +286,13 @@ cd frontend && npm run deploy
 git push origin main
 
 # Logs Backend
-# Voir sur dashboard.render.com
+# Voir sur le dashboard de votre hébergeur
 
 # Logs Frontend
 # Voir sur vercel.com/dashboard
 
 # Test endpoint Backend
-curl https://votre-backend.onrender.com/health
+curl https://votre-backend.example.com/health
 
 # Test Frontend
 # Ouvrir https://votre-frontend.vercel.app dans le navigateur
@@ -332,6 +303,7 @@ curl https://votre-backend.onrender.com/health
 ## 🎯 Workflow Recommandé
 
 1. **Développement local**:
+
    ```bash
    # Terminal 1 - Backend
    cd backend
@@ -346,6 +318,7 @@ curl https://votre-backend.onrender.com/health
 2. **Tester localement** → Tout fonctionne ✅
 
 3. **Commit et Push**:
+
    ```bash
    git add .
    git commit -m "feat: ma nouvelle fonctionnalité"
@@ -362,7 +335,7 @@ curl https://votre-backend.onrender.com/health
 
 Si vous rencontrez des problèmes:
 
-1. Consultez les logs (Render + Vercel)
+1. Consultez les logs (hébergeur backend + Vercel)
 2. Vérifiez les [GitHub Actions logs](https://github.com/RawaneG/memoire/actions)
 3. Testez les endpoints manuellement
 4. Vérifiez les variables d'environnement
@@ -371,7 +344,6 @@ Si vous rencontrez des problèmes:
 
 ## 🔗 Liens Utiles
 
-- [Documentation Render](https://render.com/docs)
 - [Documentation Vercel](https://vercel.com/docs)
 - [GitHub Actions Documentation](https://docs.github.com/en/actions)
 - [Gunicorn Documentation](https://docs.gunicorn.org/)

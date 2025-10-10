@@ -2,7 +2,7 @@
 
 ## 📊 Résumé des Options
 
-Vous avez maintenant **2 options de déploiement** configurées :
+Vous avez maintenant une option de déploiement recommandée :
 
 ### Option 1 : Fly.io (Recommandé pour Spark) 🌟
 
@@ -12,53 +12,42 @@ Vous avez maintenant **2 options de déploiement** configurées :
 ✅ Configuration optimisée incluse
 
 **📖 Documentation :**
+
 - [FLYIO_QUICK_START.md](./FLYIO_QUICK_START.md) - Démarrage en 5 min
 - [FLYIO_DEPLOYMENT.md](./FLYIO_DEPLOYMENT.md) - Guide complet
 
-### Option 2 : Render (Alternative Simple)
-
-✅ **512MB RAM**
-⚠️ **simple_app.py uniquement** (pas de Spark)
-✅ **100% gratuit**
-✅ Plus simple à configurer
-
-**📖 Documentation :**
-- [QUICK_START_DEPLOYMENT.md](./QUICK_START_DEPLOYMENT.md)
-- [DEPLOYMENT.md](./DEPLOYMENT.md)
+<!-- Section Render supprimée -->
 
 ---
 
 ## 🆚 Comparaison Détaillée
 
-| Critère | Fly.io | Render |
-|---------|--------|--------|
-| **RAM Gratuit** | 768MB (3×256MB) | 512MB |
-| **Apache Spark** | ✅ Fonctionne | ❌ Out of Memory |
-| **Fichier Backend** | `app.py` ✅ | `simple_app.py` ⚠️ |
-| **Modèles ML** | Spark ML complet | scikit-learn basique |
-| **Performance** | Haute | Moyenne |
-| **Cold Start** | ~10-15s | ~30-60s |
-| **Setup** | 5 min (CLI) | 3 min (Web) |
-| **Carte Bancaire** | ❌ Non requise | ❌ Non requise |
-| **Auto-Deploy** | ✅ GitHub Actions | ✅ GitHub Actions |
-| **Docker** | ✅ Natif | ⚠️ Plan payant |
-| **HTTPS/SSL** | ✅ Gratuit | ✅ Gratuit |
+| Critère             | Fly.io            |
+| ------------------- | ----------------- |
+| **RAM Gratuit**     | 768MB (3×256MB)   |
+| **Apache Spark**    | ✅ Fonctionne     |
+| **Fichier Backend** | `app.py` ✅       |
+| **Modèles ML**      | Spark ML complet  |
+| **Performance**     | Haute             |
+| **Cold Start**      | ~10-15s           |
+| **Setup**           | 5 min (CLI)       |
+| **Carte Bancaire**  | ❌ Non requise    |
+| **Auto-Deploy**     | ✅ GitHub Actions |
+| **Docker**          | ✅ Natif          |
+| **HTTPS/SSL**       | ✅ Gratuit        |
 
 ---
 
 ## 🎯 Quelle Option Choisir ?
 
 ### Choisir Fly.io si :
+
 - ✅ Vous voulez **Apache Spark** (modèles ML avancés)
 - ✅ Vous voulez utiliser **app.py** avec toutes les features
 - ✅ Vous voulez de **meilleures performances**
 - ✅ Vous êtes à l'aise avec le terminal (flyctl CLI)
 
-### Choisir Render si :
-- ✅ Vous préférez une **interface web simple**
-- ✅ Les modèles ML basiques vous suffisent
-- ✅ Vous voulez le **setup le plus rapide**
-- ✅ simple_app.py est suffisant pour votre cas d'usage
+<!-- Choix Render supprimé -->
 
 ---
 
@@ -87,17 +76,7 @@ flyctl tokens create deploy
 
 **📖 Guide détaillé :** [FLYIO_QUICK_START.md](./FLYIO_QUICK_START.md)
 
-### Pour Render (Simple)
-
-```bash
-# 1. Aller sur render.com
-# 2. Connecter GitHub
-# 3. Créer Web Service → Sélectionner votre repo
-# 4. Render détecte automatiquement render.yaml
-# 5. Configurer GitHub Secrets (RENDER_API_KEY, RENDER_SERVICE_ID)
-```
-
-**📖 Guide détaillé :** [QUICK_START_DEPLOYMENT.md](./QUICK_START_DEPLOYMENT.md)
+<!-- Étapes Render supprimées -->
 
 ---
 
@@ -114,15 +93,7 @@ backend/
 └── app.py                  ← Backend complet avec Spark
 ```
 
-### Render
-
-```
-backend/
-├── Procfile                ← Configuration Gunicorn
-├── render.yaml             ← Configuration Render
-├── requirements.txt        ← Dépendances Python
-└── app.py ou simple_app.py ← Backend
-```
+<!-- Structure Render supprimée -->
 
 ---
 
@@ -131,14 +102,14 @@ backend/
 Les deux options ont des workflows GitHub Actions configurés :
 
 ### Fly.io
+
 - [.github/workflows/deploy-flyio.yml](.github/workflows/deploy-flyio.yml)
 - Secret requis : `FLY_API_TOKEN`
 
-### Render
-- [.github/workflows/deploy-backend.yml](.github/workflows/deploy-backend.yml)
-- Secrets requis : `RENDER_API_KEY`, `RENDER_SERVICE_ID`
+<!-- Workflow Render supprimé -->
 
 ### Frontend (Vercel) - Identique pour les deux
+
 - [.github/workflows/deploy.yml](.github/workflows/deploy.yml)
 - Secrets requis : `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`
 
@@ -156,16 +127,15 @@ Les deux options ont des workflows GitHub Actions configurés :
 4. ✅ **100% gratuit** - Pas de limitations sur Spark
 5. ✅ **Configuration Docker** - Environnement stable et reproductible
 
-### Alternative :
-Si vous trouvez Fly.io trop complexe, utilisez **Render avec simple_app.py** en attendant, et migrez vers Fly.io plus tard.
+<!-- Alternative Render supprimée -->
 
 ---
 
 ## 📋 Checklist de Déploiement
 
 ### Préparation (Déjà fait ✅)
+
 - [x] Fichiers Fly.io créés
-- [x] Fichiers Render créés
 - [x] Spark optimisé pour 768MB
 - [x] Frontend Vercel configuré
 - [x] GitHub Actions configurés
@@ -174,19 +144,17 @@ Si vous trouvez Fly.io trop complexe, utilisez **Render avec simple_app.py** en 
 ### À Faire Maintenant
 
 **Si vous choisissez Fly.io :**
+
 - [ ] Installer flyctl
 - [ ] Créer compte Fly.io
 - [ ] Déployer : `flyctl launch && flyctl deploy`
 - [ ] Configurer `FLY_API_TOKEN` dans GitHub
 - [ ] Mettre à jour URL frontend
 
-**Si vous choisissez Render :**
-- [ ] Créer compte Render
-- [ ] Créer Web Service
-- [ ] Configurer secrets GitHub
-- [ ] Mettre à jour URL frontend
+<!-- Checklist Render supprimée -->
 
 **Dans tous les cas :**
+
 - [ ] Configurer Vercel (frontend)
 - [ ] Tester l'endpoint `/health`
 - [ ] Push vers GitHub pour auto-deploy
@@ -198,20 +166,20 @@ Si vous trouvez Fly.io trop complexe, utilisez **Render avec simple_app.py** en 
 ### Documentation Complète
 
 **Fly.io :**
+
 - [FLYIO_QUICK_START.md](./FLYIO_QUICK_START.md) - Démarrage rapide
 - [FLYIO_DEPLOYMENT.md](./FLYIO_DEPLOYMENT.md) - Guide complet
 
-**Render :**
-- [QUICK_START_DEPLOYMENT.md](./QUICK_START_DEPLOYMENT.md) - Démarrage rapide
-- [DEPLOYMENT.md](./DEPLOYMENT.md) - Guide complet
+<!-- Liens Render supprimés -->
 
 **General :**
+
 - [NEXT_STEPS.md](./NEXT_STEPS.md) - Prochaines étapes
 
 ### Ressources Officielles
 
 - [Documentation Fly.io](https://fly.io/docs/)
-- [Documentation Render](https://render.com/docs)
+<!-- Lien Render supprimé -->
 - [Documentation Vercel](https://vercel.com/docs)
 
 ---
@@ -224,4 +192,4 @@ Consultez la section dépannage dans chaque guide de déploiement.
 
 ✨ **Bonne chance avec votre déploiement !** 🚀
 
-*Note : Vous pouvez utiliser les deux options en parallèle et choisir celle qui vous convient le mieux après les avoir testées.*
+_Note : Vous pouvez utiliser les deux options en parallèle et choisir celle qui vous convient le mieux après les avoir testées._

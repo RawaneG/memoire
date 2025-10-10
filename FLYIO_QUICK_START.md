@@ -14,11 +14,13 @@
 ### 1️⃣ Installer Flyctl (2 min)
 
 **Windows:**
+
 ```powershell
 iwr https://fly.io/install.ps1 -useb | iex
 ```
 
 **Mac/Linux:**
+
 ```bash
 curl -L https://fly.io/install.sh | sh
 ```
@@ -87,6 +89,7 @@ vercel env add REACT_APP_API_URL production
 ```
 
 Ou éditez `frontend/src/config/environments.js`:
+
 ```javascript
 production: {
   API_BASE_URL: 'https://owid-predictor-api.fly.dev',
@@ -116,6 +119,7 @@ flyctl status
 ## ⚠️ Si ça Crash
 
 **Vérifier les logs:**
+
 ```bash
 flyctl logs --follow
 ```
@@ -131,6 +135,7 @@ C'est normal la première fois (~10-15s). Fly.io met en veille les apps inactive
 ## 💰 Coûts
 
 **Free Tier:**
+
 - 3 VMs × 256MB = **0€**
 - 160GB transfert/mois = **0€**
 - HTTPS/SSL = **0€**
@@ -147,15 +152,15 @@ Consultez [FLYIO_DEPLOYMENT.md](./FLYIO_DEPLOYMENT.md) pour le guide complet.
 
 ## 🆚 Pourquoi Fly.io au lieu de Render?
 
-| Critère | Render | Fly.io |
-|---------|--------|--------|
-| RAM | 512MB ❌ | 768MB ✅ |
-| Spark | Crash ❌ | Fonctionne ✅ |
-| Prix | Gratuit ✅ | Gratuit ✅ |
-| Setup | 5 min | 5 min |
+| Critère | Render     | Fly.io        |
+| ------- | ---------- | ------------- |
+| RAM     | 512MB ❌   | 768MB ✅      |
+| Spark   | Crash ❌   | Fonctionne ✅ |
+| Prix    | Gratuit ✅ | Gratuit ✅    |
+| Setup   | 5 min      | 5 min         |
 
 **Fly.io gagne pour Spark !** 🏆
 
 ---
 
-✨ **Enjoy your free Spark backend!** 🚀
+# 🚀 Déploiement Complet avec Fly.io et Vercel
