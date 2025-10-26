@@ -1,35 +1,38 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Zap, Star, Info, TrendingUp } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 const ModelSelector = ({ value, onChange, country, onToggle, shouldClose }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [highlightIndex, setHighlightIndex] = useState(0);
   const dropdownRef = useRef(null);
   const buttonRef = useRef(null);
   const { t } = useTranslation();
-  const [models] = useState({
+
+  // Get models data from translations
+  const getModels = () => ({
     available_models: {
       linear: {
-        name: 'Linear Regression',
-        description: 'Simple, fast and interpretable',
-        best_for: ['limited data', 'linear trends'],
+        name: t('modelSelector.models.linear.name'),
+        description: t('modelSelector.models.linear.description'),
+        bestFor: t('modelSelector.models.linear.bestFor'),
         complexity: 'Low',
         accuracy: 'Medium',
         speed: 'Fast'
       },
       random_forest: {
-        name: 'Random Forest',
-        description: 'Robust ensemble model',
-        best_for: ['complex data', 'non-linear relationships'],
+        name: t('modelSelector.models.random_forest.name'),
+        description: t('modelSelector.models.random_forest.description'),
+        bestFor: t('modelSelector.models.random_forest.bestFor'),
         complexity: 'Medium',
         accuracy: 'High',
         speed: 'Medium'
       },
       gradient_boost: {
-        name: 'Gradient Boosting',
-        description: 'Advanced high-precision model',
-        best_for: ['precise predictions', 'large datasets'],
+        name: t('modelSelector.models.gradient_boost.name'),
+        description: t('modelSelector.models.gradient_boost.description'),
+        bestFor: t('modelSelector.models.gradient_boost.bestFor'),
         complexity: 'High',
         accuracy: 'Very High',
         speed: 'Slow'
@@ -41,6 +44,8 @@ const ModelSelector = ({ value, onChange, country, onToggle, shouldClose }) => {
       Germany: 'gradient_boost'
     }
   });
+
+  const models = getModels();
 
   const getRecommendedModel = () => {
     return models.recommended_by_country[country] || 'random_forest';
@@ -99,10 +104,7 @@ const ModelSelector = ({ value, onChange, country, onToggle, shouldClose }) => {
     }
   };
 
-  const handleSelect = (modelKey) => {
-    onChange(modelKey);
-    setIsOpen(false);
-  };
+  const handleSelect = useCallback((modelKey) => { onChange(modelKey); setIsOpen(false); }, [onChange]);
 
   const handleToggle = () => {
     const newIsOpen = !isOpen;
@@ -119,55 +121,25 @@ const ModelSelector = ({ value, onChange, country, onToggle, shouldClose }) => {
     }
   }, [shouldClose, isOpen]);
 
-  // Handle outside clicks and keyboard navigation
+  // Outside click + keyboard navigation
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target) && 
-          buttonRef.current && !buttonRef.current.contains(event.target)) {
-        setIsOpen(false);
-      }
+    if (!isOpen) return;
+    const handleClickOutside = (e) => { if (!dropdownRef.current?.contains(e.target) && !buttonRef.current?.contains(e.target)) setIsOpen(false); };
+    const entries = Object.entries(models.available_models);
+    const handleKey = (e) => {
+      if (e.key === 'Escape') { setIsOpen(false); buttonRef.current?.focus(); }
+      else if (e.key === 'ArrowDown') { e.preventDefault(); setHighlightIndex(i => (i + 1) % entries.length); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); setHighlightIndex(i => (i - 1 + entries.length) % entries.length); }
+      else if (e.key === 'Enter' || e.key === ' ') { const key = entries[highlightIndex]?.[0]; if (key) handleSelect(key); }
     };
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKey);
+    return () => { document.removeEventListener('mousedown', handleClickOutside); document.removeEventListener('keydown', handleKey); };
+  }, [isOpen, highlightIndex, models, handleSelect]);
 
-    const handleKeyDown = (event) => {
-      if (event.key === 'Escape' && isOpen) {
-        setIsOpen(false);
-        buttonRef.current?.focus();
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      document.addEventListener('keydown', handleKeyDown);
-      return () => {
-        document.removeEventListener('mousedown', handleClickOutside);
-        document.removeEventListener('keydown', handleKeyDown);
-      };
-    }
-  }, [isOpen]);
-
-  const dropdownVariants = {
-    hidden: { 
-      opacity: 0, 
-      scale: 0.95,
-      y: -10,
-      transition: { duration: 0.15 }
-    },
-    visible: { 
-      opacity: 1, 
-      scale: 1,
-      y: 0,
-      transition: { duration: 0.2, ease: "easeOut" }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, x: -20 },
-    visible: (i) => ({
-      opacity: 1,
-      x: 0,
-      transition: { delay: i * 0.05, duration: 0.2 }
-    })
-  };
+  const prefersReduced = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const dropdownVariants = { hidden: { opacity: 0, y: -6, scale: 0.985 }, visible: { opacity: 1, y: 0, scale: 1, transition: { duration: prefersReduced ? 0.15 : 0.25, ease: 'easeOut' } } };
+  const itemVariants = { hidden: { opacity: 0, y: prefersReduced ? 0 : 6 }, visible: (i) => ({ opacity: 1, y: 0, transition: { duration: prefersReduced ? 0.15 : 0.22, ease: 'easeOut', delay: prefersReduced ? 0 : 0.015 * i } }) };
 
   const selectedModel = models.available_models[value];
   const IconComponent = getModelIcon(value);
@@ -178,7 +150,7 @@ const ModelSelector = ({ value, onChange, country, onToggle, shouldClose }) => {
       <motion.button
         ref={buttonRef}
         type="button"
-        className="w-full flex items-center justify-between px-6 py-4 bg-white/10 backdrop-blur-sm border border-white/30 rounded-2xl text-white font-medium transition-all duration-300 hover:bg-white/20 hover:border-primary-400 focus:outline-none focus:border-primary-400 focus:bg-white/20 focus:ring-2 focus:ring-primary-500/50"
+        className="w-full flex items-center justify-between px-6 py-4 bg-white/10 backdrop-blur-sm border border-white/30 rounded-2xl text-white font-medium transition-all duration-300 hover:bg-white/20 hover:border-primary-400 focus:outline-none focus:border-primary-400 focus:bg-white/20 focus:ring-2 focus:ring-primary-500/50 relative"
         onClick={handleToggle}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
@@ -192,7 +164,7 @@ const ModelSelector = ({ value, onChange, country, onToggle, shouldClose }) => {
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
       >
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-3 pr-4">
           <IconComponent className="w-5 h-5 text-primary-400" />
           <div className="text-left">
             <div className="font-semibold">{selectedModel?.name || t('modelSelector.selectModel')}</div>
@@ -204,6 +176,7 @@ const ModelSelector = ({ value, onChange, country, onToggle, shouldClose }) => {
             </div>
           )}
         </div>
+        <span className={`absolute inset-y-1 left-1 w-1 rounded-full transition-opacity bg-gradient-to-b from-primary-400 via-accent-400 to-primary-500 ${isOpen ? 'opacity-100' : 'opacity-0'}`} aria-hidden />
         <motion.div
           animate={{ rotate: isOpen ? 180 : 0 }}
           transition={{ duration: 0.2 }}
@@ -245,14 +218,10 @@ const ModelSelector = ({ value, onChange, country, onToggle, shouldClose }) => {
                       initial="hidden"
                       animate="visible"
                       custom={index}
-                      className={`w-full p-4 text-left rounded-xl border-2 transition-all duration-300 group ${
-                        isSelected
-                          ? 'border-primary-400 bg-primary-500/20'
-                          : 'border-white/20 hover:border-white/40 hover:bg-white/10'
-                      }`}
+                      className={`w-full p-4 text-left rounded-xl border-2 transition-all duration-300 group ${isSelected ? 'border-primary-400 bg-primary-500/20 ring-1 ring-primary-400/40' : highlightIndex === index ? 'border-white/30 bg-white/10' : 'border-white/20 hover:border-white/40 hover:bg-white/10'}`}
                       onClick={() => handleSelect(key)}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
+                      whileHover={prefersReduced ? {} : { scale: 1.015 }}
+                      whileTap={prefersReduced ? {} : { scale: 0.985 }}
                     >
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center space-x-3">
@@ -300,7 +269,7 @@ const ModelSelector = ({ value, onChange, country, onToggle, shouldClose }) => {
                       <div className="mt-3 pt-3 border-t border-white/10">
                         <div className="flex items-center space-x-2 text-xs text-white/60">
                           <Info className="w-3 h-3" />
-                          <span>{t('modelSelector.bestFor')}: {model.best_for.join(', ')}</span>
+                          <span>{model.bestFor}</span>
                         </div>
                       </div>
                     </motion.button>

@@ -2,29 +2,44 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦠</text></svg>" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦠</text></svg>"
+    />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#0ea5e9" />
-    <meta name="description" content="Advanced COVID-19 prediction using machine learning models with country-specific optimizations" />
-    <meta name="keywords" content="COVID-19, pandemic, prediction, machine learning, OWID, Senegal" />
-    <meta name="author" content="OWID Predictor Team" />
-    
+    <meta
+      name="description"
+      content="Advanced COVID-19 prediction using machine learning models with country-specific optimizations"
+    />
+    <meta
+      name="keywords"
+      content="COVID-19, pandemic, prediction, machine learning, Senegal, SEN Prediction"
+    />
+    <meta name="author" content="SEN Prediction Team" />
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="OWID COVID-19 Predictor" />
-    <meta property="og:description" content="Advanced machine learning models for COVID-19 case prediction with country-specific optimizations" />
-    
+    <meta property="og:title" content="SEN Prediction" />
+    <meta
+      property="og:description"
+      content="Advanced machine learning models for COVID-19 case prediction with country-specific optimizations"
+    />
+
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:title" content="OWID COVID-19 Predictor" />
-    <meta property="twitter:description" content="Advanced machine learning models for COVID-19 case prediction with country-specific optimizations" />
-    
+    <meta property="twitter:title" content="SEN Prediction" />
+    <meta
+      property="twitter:description"
+      content="Advanced machine learning models for COVID-19 case prediction with country-specific optimizations"
+    />
+
     <!-- Preconnect to external domains -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    
-    <title>OWID COVID-19 Predictor - Advanced ML Pandemic Forecasting</title>
-    
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <title>SEN Prediction - Advanced ML Pandemic Forecasting</title>
+
     <style>
       /* Loading screen styles */
       #initial-loader {
@@ -41,17 +56,17 @@
         opacity: 1;
         transition: opacity 0.5s ease-out;
       }
-      
+
       #initial-loader.hide {
         opacity: 0;
         pointer-events: none;
       }
-      
+
       .loader-content {
         text-align: center;
         color: white;
       }
-      
+
       .loader-spinner {
         width: 50px;
         height: 50px;
@@ -61,21 +76,25 @@
         animation: spin 1s linear infinite;
         margin: 0 auto 20px;
       }
-      
+
       @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
       }
-      
+
       .loader-text {
-        font-family: 'Inter', system-ui, sans-serif;
+        font-family: "Inter", system-ui, sans-serif;
         font-size: 18px;
         font-weight: 600;
         margin-bottom: 10px;
       }
-      
+
       .loader-subtext {
-        font-family: 'Inter', system-ui, sans-serif;
+        font-family: "Inter", system-ui, sans-serif;
         font-size: 14px;
         opacity: 0.7;
       }
@@ -83,41 +102,54 @@
   </head>
   <body>
     <noscript>
-      <div style="padding: 20px; text-align: center; font-family: Arial, sans-serif;">
+      <div
+        style="
+          padding: 20px;
+          text-align: center;
+          font-family: Arial, sans-serif;
+        "
+      >
         <h2>JavaScript Required</h2>
-        <p>This application requires JavaScript to run. Please enable JavaScript in your browser settings.</p>
+        <p>
+          This application requires JavaScript to run. Please enable JavaScript
+          in your browser settings.
+        </p>
       </div>
     </noscript>
-    
+
     <!-- Initial loading screen -->
     <div id="initial-loader">
       <div class="loader-content">
         <div class="loader-spinner"></div>
-        <div class="loader-text">OWID Predictor</div>
-        <div class="loader-subtext">Loading advanced ML models...</div>
+        <div class="loader-text">SEN Prediction</div>
+        <div class="loader-subtext">Chargement en cours...</div>
       </div>
     </div>
-    
+
     <div id="root"></div>
-    
+
     <script>
       // Hide initial loader when React app is ready
-      window.addEventListener('load', function() {
-        setTimeout(function() {
-          const loader = document.getElementById('initial-loader');
+      window.addEventListener("load", function () {
+        setTimeout(function () {
+          const loader = document.getElementById("initial-loader");
           if (loader) {
-            loader.classList.add('hide');
+            loader.classList.add("hide");
             setTimeout(() => loader.remove(), 500);
           }
         }, 1000);
       });
-      
+
       // Performance monitoring
-      if ('performance' in window) {
-        window.addEventListener('load', function() {
-          setTimeout(function() {
-            const perfData = performance.getEntriesByType('navigation')[0];
-            console.log('Page Load Time:', perfData.loadEventEnd - perfData.fetchStart, 'ms');
+      if ("performance" in window) {
+        window.addEventListener("load", function () {
+          setTimeout(function () {
+            const perfData = performance.getEntriesByType("navigation")[0];
+            console.log(
+              "Page Load Time:",
+              perfData.loadEventEnd - perfData.fetchStart,
+              "ms"
+            );
           }, 0);
         });
       }

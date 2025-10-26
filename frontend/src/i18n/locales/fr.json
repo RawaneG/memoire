@@ -1,7 +1,8 @@
 {
   "app": {
-    "title": "Prédicteur COVID-19 OWID",
-    "subtitle": "Prédictions alimentées par l'IA avec des modèles d'apprentissage automatique avancés"
+    "title": "SEN Prediction",
+    "subtitle": "Prédictions alimentées par l'IA avec des modèles d'apprentissage automatique avancés",
+    "description": "Modèles d'apprentissage automatique avancés pour la prédiction des cas COVID-19 avec des optimisations spécifiques par pays, en particulier pour le Sénégal."
   },
   "navigation": {
     "home": "Accueil",
@@ -13,7 +14,7 @@
     "subtitle": "Choisissez un pays pour les prédictions COVID-19",
     "searchPlaceholder": "Rechercher un pays...",
     "noResults": "Aucun pays trouvé correspondant à",
-    "featuredCountries": "Pays en Vedette", 
+    "featuredCountries": "Pays en Vedette",
     "otherCountries": "Autres Pays",
     "specialConfig": "Configuration Spéciale",
     "totalCountries": "pays disponibles",
@@ -25,7 +26,7 @@
     "subtitle": "Sélectionnez l'algorithme d'apprentissage automatique",
     "recommended": "Recommandé",
     "complexity": "Complexité",
-    "accuracy": "Précision", 
+    "accuracy": "Précision",
     "speed": "Vitesse",
     "selectModel": "Sélectionnez un modèle",
     "bestFor": "Idéal pour",
@@ -40,7 +41,7 @@
     },
     "models": {
       "linear": {
-        "name": "Régression Linéaire", 
+        "name": "Régression Linéaire",
         "description": "Simple, rapide et interprétable",
         "bestFor": "Idéal pour les données limitées et les tendances linéaires"
       },
@@ -67,13 +68,13 @@
     "confidenceRange": "Plage de Confiance",
     "range": "Plage",
     "minimum": "Minimum",
-    "maximum": "Maximum", 
+    "maximum": "Maximum",
     "average": "Moyenne",
     "total": "Total",
     "metrics": {
       "title": "Métriques du Modèle",
       "rmse": "RMSE",
-      "mae": "MAE", 
+      "mae": "MAE",
       "r2Score": "Score R²",
       "trainingSamples": "Échantillons d'Entraînement",
       "testSamples": "Échantillons de Test"
@@ -98,9 +99,12 @@
   },
   "processingSteps": {
     "fetchingData": "Récupération des données",
-    "processingFeatures": "Traitement des fonctionnalités", 
+    "processingFeatures": "Traitement des fonctionnalités",
     "trainingModel": "Entraînement du modèle",
     "generatingPredictions": "Génération des prédictions"
+  },
+  "predictionResults": {
+    "title": "Résultats de Prédiction"
   },
   "metricsDisplay": {
     "modelPerformance": "Performance du Modèle",
@@ -125,12 +129,15 @@
       "good": "Bon",
       "fair": "Correct",
       "poor": "Mauvais"
-    }
+    },
+    "rawR2Negative": "R² brut négatif",
+    "adjustedR2Note": "valeur plafonnée à 0% pour une meilleure lisibilité"
   },
   "horizon": {
     "title": "Horizon de Prédiction",
     "subtitle": "Sélectionnez la période de prédiction",
     "days": "jours",
+    "dayShort": "j",
     "options": {
       "7": "1 semaine",
       "14": "2 semaines",
@@ -173,7 +180,7 @@
   "formatting": {
     "numbers": {
       "thousand": "k",
-      "million": "M", 
+      "million": "M",
       "billion": "G"
     },
     "dates": {
@@ -185,5 +192,25 @@
   "welcome": {
     "title": "Prêt à Prédire",
     "message": "Configurez vos paramètres à gauche et cliquez sur \"Prédire\" pour voir des prévisions COVID-19 avancées alimentées par ML."
+  },
+  "cleaningLevel": {
+    "title": "Niveau de Nettoyage",
+    "recommended": "Recommandé",
+    "footer": "Le niveau de nettoyage détermine comment les données aberrantes sont traitées",
+    "minimal": {
+      "name": "Minimal",
+      "description": "Remplace uniquement les valeurs NULL par 0",
+      "useCase": "Pour des données déjà nettoyées et de haute qualité"
+    },
+    "standard": {
+      "name": "Standard",
+      "description": "Suppression négatives + outliers >10x + lissage 7j",
+      "useCase": "Usage général, bon équilibre précision/conservation"
+    },
+    "strict": {
+      "name": "Strict",
+      "description": "Outliers >5x + lissage strict + validation renforcée",
+      "useCase": "Pour des données brutes avec beaucoup d'anomalies"
+    }
   }
 }

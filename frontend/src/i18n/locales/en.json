@@ -1,7 +1,8 @@
 {
   "app": {
-    "title": "OWID COVID-19 Predictor",
-    "subtitle": "AI-powered predictions with advanced machine learning models"
+    "title": "SEN Prediction",
+    "subtitle": "AI-powered predictions with advanced machine learning models",
+    "description": "Advanced machine learning models for COVID-19 case prediction with country-specific optimizations, especially for Senegal."
   },
   "navigation": {
     "home": "Home",
@@ -15,7 +16,7 @@
     "noResults": "No countries found matching",
     "featuredCountries": "Featured Countries",
     "otherCountries": "Other Countries",
-    "specialConfig": "Special Configuration", 
+    "specialConfig": "Special Configuration",
     "totalCountries": "countries available",
     "selectCountry": "Select a country",
     "optimized": "Optimized"
@@ -79,7 +80,7 @@
       "testSamples": "Test Samples"
     },
     "chart": {
-      "cases": "Cases", 
+      "cases": "Cases",
       "date": "Date",
       "prediction": "Prediction",
       "confidence": "Confidence Interval"
@@ -99,13 +100,16 @@
   "processingSteps": {
     "fetchingData": "Fetching data",
     "processingFeatures": "Processing features",
-    "trainingModel": "Training model", 
+    "trainingModel": "Training model",
     "generatingPredictions": "Generating predictions"
+  },
+  "predictionResults": {
+    "title": "Prediction Results"
   },
   "metricsDisplay": {
     "modelPerformance": "Model Performance",
     "overallAccuracy": "Overall accuracy metrics",
-    "errorAnalysis": "Error Analysis", 
+    "errorAnalysis": "Error Analysis",
     "predictionAccuracy": "Prediction accuracy",
     "trainingData": "Training Data",
     "datasetInfo": "Dataset information",
@@ -125,12 +129,15 @@
       "good": "Good",
       "fair": "Fair",
       "poor": "Poor"
-    }
+    },
+    "rawR2Negative": "Negative raw R²",
+    "adjustedR2Note": "clipped to 0% for readability"
   },
   "horizon": {
     "title": "Prediction Horizon",
     "subtitle": "Select the prediction period",
     "days": "days",
+    "dayShort": "d",
     "options": {
       "7": "1 week",
       "14": "2 weeks",
@@ -185,5 +192,25 @@
   "welcome": {
     "title": "Ready to Predict",
     "message": "Configure your parameters on the left and click \"Generate Prediction\" to see advanced ML-powered COVID-19 forecasts."
+  },
+  "cleaningLevel": {
+    "title": "Data Cleaning Level",
+    "recommended": "Recommended",
+    "footer": "Cleaning level determines how outlier data is handled",
+    "minimal": {
+      "name": "Minimal",
+      "description": "Replace NULL values with 0 only",
+      "useCase": "For already cleaned high quality data"
+    },
+    "standard": {
+      "name": "Standard",
+      "description": "Remove negatives + outliers >10x + 7-day smoothing",
+      "useCase": "General use, good balance of accuracy and retention"
+    },
+    "strict": {
+      "name": "Strict",
+      "description": "Outliers >5x + strict smoothing + enhanced validation",
+      "useCase": "For raw data with many anomalies"
+    }
   }
 }

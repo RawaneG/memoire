@@ -3,10 +3,11 @@ const environments = {
     API_BASE_URL: 'http://localhost:5000',
   },
   production: {
-    API_BASE_URL: 'https://your-production-api.com',
+    // URL du backend Fly.io
+    API_BASE_URL: process.env.REACT_APP_API_URL || 'https://owid-predictor-api.fly.dev',
   },
   staging: {
-    API_BASE_URL: 'https://your-staging-api.com',
+    API_BASE_URL: process.env.REACT_APP_API_URL || 'https://your-staging-api.com',
   }
 };
 

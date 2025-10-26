@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: sen-prediction-api
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: PYTHON_VERSION
+        value: 3.9.18
+      - key: PORT
+        generateValue: true
+    healthCheckPath: /health

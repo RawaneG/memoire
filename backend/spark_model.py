@@ -6,6 +6,44 @@ from pyspark.ml.regression import LinearRegression, RandomForestRegressor, GBTRe
 from pyspark.ml.evaluation import RegressionEvaluator
 import logging
 from typing import Dict, List, Optional, Tuple
+import math
+import threading
+
+# ---------------------------------------------------------------------------
+# Spark Session Singleton
+# ---------------------------------------------------------------------------
+_SPARK_LOCK = threading.Lock()
+_SPARK_SESSION: Optional[SparkSession] = None
+
+def get_spark(app_name: str = "SENPrediction") -> SparkSession:
+    global _SPARK_SESSION
+    if _SPARK_SESSION is not None:
+        return _SPARK_SESSION
+    with _SPARK_LOCK:
+        if _SPARK_SESSION is None:
+            _SPARK_SESSION = (SparkSession.builder
+                              .appName(app_name)
+                              .config("spark.ui.showConsoleProgress", "false")
+                              # Optimisations mémoire pour Fly.io (768MB total)
+                              .config("spark.driver.memory", "400m")
+                              .config("spark.executor.memory", "256m")
+                              .config("spark.driver.maxResultSize", "100m")
+                              .config("spark.sql.shuffle.partitions", "4")  # Réduit de 200 par défaut
+                              .config("spark.default.parallelism", "2")
+                              .config("spark.sql.autoBroadcastJoinThreshold", "10485760")  # 10MB
+                              .config("spark.memory.fraction", "0.6")
+                              .config("spark.memory.storageFraction", "0.5")
+                              .getOrCreate())
+            logging.info("[Spark] Session created with optimized memory settings (768MB)")
+    return _SPARK_SESSION
+
+def warmup_spark(data_path: str = "owid-covid-data-sample.csv"):
+    try:
+        spark = get_spark("SENPredictionWarmup")
+        spark.read.csv(data_path, header=True, inferSchema=True).select("location").limit(5).collect()
+        logging.info("[Spark] Warmup completed")
+    except Exception as e:
+        logging.warning(f"[Spark] Warmup failed: {e}")
 
 # Configuration pour pays spécifiques avec leurs caractéristiques
 COUNTRY_CONFIGS = {
@@ -95,19 +133,18 @@ COUNTRY_CONFIGS = {
 
 def get_available_countries(data_path: str = "owid-covid-data.csv") -> List[str]:
     """Retourne la liste des pays disponibles dans le dataset."""
-    spark = SparkSession.builder.appName("OWIDCountryList").getOrCreate()
+    spark = get_spark("SENCountryList")
     try:
-        # Try main data file first, then fallback to sample
         try:
             df = spark.read.csv(data_path, header=True, inferSchema=True)
-        except:
+        except Exception:
             logging.warning(f"Main data file {data_path} not found, using sample data")
             df = spark.read.csv("owid-covid-data-sample.csv", header=True, inferSchema=True)
-        
         countries = [row["location"] for row in df.select("location").distinct().collect()]
         return sorted(countries)
-    finally:
-        spark.stop()
+    except Exception as e:
+        logging.error(f"Failed to list countries: {e}")
+        return []
 
 def validate_country_data(df_country, country: str, min_rows: int = 10) -> bool:
     """Valide si le pays a suffisamment de données pour l'entraînement."""
@@ -136,28 +173,34 @@ def create_country_specific_features(df_country, country: str):
     
     return df_features
 
-def predict_cases(country: str, model_type: str = 'linear', horizon: int = 14, 
-                 data_path: str = "owid-covid-data.csv") -> Dict:
+def predict_cases(country: str, model_type: str = 'linear', horizon: int = 14,
+                 data_path: str = "owid-covid-data.csv", lang: str = 'fr',
+                 cleaning_level: str = 'standard') -> Dict:
     """Prédit les cas COVID-19 pour un pays donné avec des modèles ML.
-    
+
     Args:
         country: Nom du pays (ex: 'Senegal', 'France')
         model_type: Type de modèle ('linear', 'random_forest', 'gradient_boost')
         horizon: Nombre de jours à prédire
-        data_path: Chemin vers le fichier de données OWID
-        
+        data_path: Chemin vers le fichier de données COVID-19
+        lang: Langue pour les messages ('fr' ou 'en')
+        cleaning_level: Niveau de nettoyage ('minimal', 'standard', 'strict')
+            - minimal: Remplace NULL par 0 uniquement
+            - standard: + suppression négatives + outliers >10x + lissage 7j
+            - strict: + outliers >5x + lissage + validation stricte
+
     Returns:
         Dict contenant les prédictions et métriques du modèle
     """
     
     # Créer une session Spark
-    spark = SparkSession.builder.appName(f"OWIDPrediction_{country}").getOrCreate()
-    
+    spark = get_spark(f"SENPrediction_{country}")
+
     try:
-        # Charger les données OWID
+        # Charger les données COVID-19
         try:
             df = spark.read.csv(data_path, header=True, inferSchema=True)
-        except:
+        except Exception:
             logging.warning(f"Main data file {data_path} not found, using sample data")
             df = spark.read.csv("owid-covid-data-sample.csv", header=True, inferSchema=True)
         
@@ -176,10 +219,12 @@ def predict_cases(country: str, model_type: str = 'linear', horizon: int = 14,
         # Créer des features spécifiques au pays
         df_country = create_country_specific_features(df_country, country)
 
-        # Créer des variables de décalage améliorées
+        # =================================================================
+        # NETTOYAGE DES DONNÉES - Niveaux configurables
+        # =================================================================
         window_spec = Window.orderBy("date")
-        
-        # Remplacer les valeurs nulles par des moyennes ou zéros
+
+        # NIVEAU MINIMAL : Toujours appliqué (remplacer NULL par 0)
         df_clean = df_country.fillna({
             'new_cases': 0,
             'new_deaths': 0,
@@ -188,7 +233,52 @@ def predict_cases(country: str, model_type: str = 'linear', horizon: int = 14,
             'total_cases': 0,
             'total_deaths': 0
         })
-        
+
+        # NIVEAU STANDARD et STRICT : Nettoyage avancé
+        if cleaning_level in ['standard', 'strict']:
+            # Supprimer les valeurs négatives (erreurs de saisie)
+            df_clean = df_clean.filter(
+                (col('new_cases') >= 0) &
+                (col('new_deaths') >= 0)
+            )
+
+            if 'new_vaccinations' in df_clean.columns:
+                df_clean = df_clean.filter(col('new_vaccinations') >= 0)
+
+            # Filtrer les valeurs aberrantes extrêmes
+            try:
+                median_cases = df_clean.approxQuantile("new_cases", [0.5], 0.01)[0]
+                if median_cases > 0:
+                    # Standard: >10x médiane, Strict: >5x médiane
+                    multiplier = 5 if cleaning_level == 'strict' else 10
+                    df_clean = df_clean.filter(col('new_cases') <= median_cases * multiplier)
+                    logging.info(f"Median new_cases={median_cases:.2f}, max_limit={median_cases * multiplier:.2f}")
+            except Exception as e:
+                logging.warning(f"Median computation error: {e}")
+
+            # Lissage sur 7 jours
+            window_7 = Window.orderBy("date").rowsBetween(-3, 3)
+            df_clean = df_clean.withColumn(
+                "cases_7d_avg",
+                spark_mean("new_cases").over(window_7)
+            )
+
+            # Standard: >5x moyenne, Strict: >3x moyenne
+            threshold = 3 if cleaning_level == 'strict' else 5
+            df_clean = df_clean.withColumn(
+                "new_cases_cleaned",
+                when(
+                    (col("new_cases") > threshold * col("cases_7d_avg")) & (col("cases_7d_avg") > 0),
+                    col("cases_7d_avg")
+                ).otherwise(col("new_cases"))
+            )
+
+            df_clean = df_clean.withColumn("new_cases", col("new_cases_cleaned")).drop("new_cases_cleaned", "cases_7d_avg")
+
+        # =================================================================
+        # CRÉATION DES FEATURES
+        # =================================================================
+
         # Variables de décalage multiples pour capturer les tendances
         df_lag = (
             df_clean
@@ -226,8 +316,10 @@ def predict_cases(country: str, model_type: str = 'linear', horizon: int = 14,
         df_lag = df_lag.dropna(subset=feature_cols, how='all')
         
         # Vérifier que nous avons encore des données après le preprocessing
-        if df_lag.count() < 20:
-            raise ValueError(f"Données insuffisantes pour {country} après preprocessing. Seulement {df_lag.count()} lignes disponibles.")
+        count = df_lag.count()
+        min_rows = 30 if cleaning_level == 'strict' else 20
+        if count < min_rows:
+            raise ValueError(f"Insufficient data after preprocessing for {country} (rows={count})")
 
         # Assembler les features disponibles
         assembler = VectorAssembler(
@@ -320,17 +412,41 @@ def predict_cases(country: str, model_type: str = 'linear', horizon: int = 14,
             })
         
         # Informations sur la qualité du modèle
+        # Sanitize metric values (replace NaN/inf with None or fallback)
+        def safe_float(value: float) -> Optional[float]:
+            try:
+                if value is None:
+                    return None
+                if isinstance(value, (int, float)) and (math.isnan(value) or math.isinf(value)):
+                    return None
+                return float(value)
+            except Exception:
+                return None
+
+        # Compute a normalized/clipped R² for UI display (0.0–1.0)
+        raw_r2 = safe_float(r2)
+        r2_normalized = None
+        try:
+            if raw_r2 is not None:
+                # clip into [0,1] so percentage stays in 0–100 for UX
+                r2_normalized = max(0.0, min(1.0, float(raw_r2)))
+        except Exception:
+            r2_normalized = None
+
         model_info = {
             "country": country,
             "model_type": model_type,
             "horizon_days": horizon,
+            "cleaning_level": cleaning_level,
             "training_samples": train_df.count(),
             "test_samples": test_df.count(),
             "features_used": feature_cols,
             "metrics": {
-                "rmse": float(rmse),
-                "mae": float(mae),
-                "r2_score": float(r2)
+                "rmse": safe_float(rmse),
+                "mae": safe_float(mae),
+                # Keep raw R² for diagnostics but also provide a normalized field for UI
+                "r2_score": raw_r2,
+                "r2_score_normalized": r2_normalized
             },
             "country_config": COUNTRY_CONFIGS.get(country, "Default"),
             "predictions": pred_list
@@ -342,7 +458,8 @@ def predict_cases(country: str, model_type: str = 'linear', horizon: int = 14,
         logging.error(f"Erreur lors de la prédiction pour {country}: {str(e)}")
         raise
     finally:
-        spark.stop()
+        # Do not stop the singleton Spark session; keep it alive for reuse.
+        pass
 
 def get_configured_countries() -> List[str]:
     """Retourne la liste des pays configurés pour les prédictions optimisées."""
@@ -355,7 +472,7 @@ def predict_all_configured_countries(model_type: str = 'linear', horizon: int = 
     Args:
         model_type: Type de modèle ('linear', 'random_forest', 'gradient_boost')
         horizon: Nombre de jours à prédire
-        data_path: Chemin vers le fichier de données OWID
+        data_path: Chemin vers le fichier de données COVID-19
         
     Returns:
         Dict contenant les prédictions pour tous les pays configurés

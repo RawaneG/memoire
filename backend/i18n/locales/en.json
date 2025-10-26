@@ -1,0 +1,115 @@
+{
+  "api": {
+    "errors": {
+      "country_required": "Parameter \"country\" required",
+      "model_not_supported": "Model \"{model}\" not supported",
+      "horizon_range": "Horizon must be between 1 and 30 days",
+      "cleaning_level_invalid": "Invalid cleaning level. Use 'minimal', 'standard' or 'strict'",
+      "country_not_found": "Country '{country}' not found. Available countries: {countries}...",
+      "insufficient_data": "Insufficient data for country '{country}'",
+      "internal_error": "Internal server error",
+      "prediction_failed": "Prediction failed for {country}: {error}"
+    },
+    "messages": {
+      "prediction_success": "Prediction successful - RMSE: {rmse:.2f}",
+      "prediction_start": "Prediction for {country} with model {model}, horizon {horizon} days",
+      "prediction_all_start": "Prediction for all configured countries with model {model}, horizon {horizon} days",
+      "prediction_all_success": "Prediction successful for {count} countries",
+      "server_starting": "Starting SEN Prediction server..."
+    },
+    "endpoints": {
+      "predict": "GET - Generate predictions for a country",
+      "predict_all": "GET - Generate predictions for all configured countries",
+      "countries": "GET - List of available countries",
+      "models": "GET - List of available ML models",
+      "health": "GET - Service status"
+    },
+    "fields": {
+      "available_countries_sample": "Sample available countries",
+      "available_models": "Available models",
+      "total_countries": "Total countries",
+      "featured_countries": "Countries with special configuration",
+      "other_countries": "Other countries",
+      "default_model": "Default model",
+      "recommended_by_country": "Recommended model by country"
+    }
+  },
+  "models": {
+    "linear": {
+      "name": "Linear Regression",
+      "description": "Simple, fast and interpretable linear model",
+      "best_for": ["limited data", "linear trends"]
+    },
+    "random_forest": {
+      "name": "Random Forest",
+      "description": "Ensemble model robust to outliers",
+      "best_for": ["complex data", "non-linear relationships"]
+    },
+    "gradient_boost": {
+      "name": "Gradient Boosting",
+      "description": "Advanced model with high accuracy",
+      "best_for": ["precise predictions", "large datasets"]
+    }
+  },
+  "cleaning_levels": {
+    "minimal": {
+      "name": "Minimal",
+      "description": "Replace NULL values with 0 only",
+      "use_case": "High quality data already cleaned"
+    },
+    "standard": {
+      "name": "Standard (Recommended)",
+      "description": "Remove negatives + outliers >10x + 7-day smoothing",
+      "use_case": "General use, good balance between accuracy and data retention"
+    },
+    "strict": {
+      "name": "Strict",
+      "description": "Outliers >5x + strict smoothing + enhanced validation",
+      "use_case": "Raw data with many anomalies"
+    }
+  },
+  "data_cleaning": {
+    "median_info": "Median cases: {median}, max limit: {max_limit}",
+    "median_error": "Unable to calculate median for filtering: {error}",
+    "insufficient_rows": "Country {country}: only {rows} rows available (minimum: {min_rows})",
+    "insufficient_after_preprocessing": "Insufficient data for {country} after preprocessing. Only {count} rows available.",
+    "training_info": "Training data: {train}, Test: {test}",
+    "data_not_found": "Main data file {path} not found, using sample data",
+    "removing_negative": "Removing negative values (input errors)",
+    "filtering_outliers": "Filtering extreme outliers (>10x median)",
+    "smoothing_peaks": "7-day smoothing to detect and correct abnormal peaks",
+    "creating_lags": "Creating lag variables to capture trends",
+    "scaling_features": "Feature normalization (important for convergence)",
+    "splitting_data": "Splitting train/test chronologically (80/20)",
+    "training_model": "Training {model_type} model",
+    "evaluating_model": "Evaluating model on test data",
+    "generating_predictions": "Generating predictions for {horizon} days"
+  },
+  "predictions": {
+    "horizon_label": "Prediction horizon",
+    "horizon_days": "{days} day(s)",
+    "next_day": "Tomorrow",
+    "next_week": "Next week",
+    "next_two_weeks": "2 weeks",
+    "next_month": "Next month"
+  },
+  "health": {
+    "status": "healthy",
+    "service": "SEN Prediction API",
+    "version": "2.0",
+    "features": ["multi-model", "country-specific", "senegal-optimized"]
+  },
+  "home": {
+    "message": "SEN Prediction API",
+    "example_request": "/predict?country=Senegal&model=random_forest&horizon=7&cleaning_level=standard&lang=en",
+    "documentation": "https://github.com/your-repo/sen-prediction-api"
+  },
+  "countries": {
+    "africa": "Africa",
+    "europe": "Europe",
+    "north_america": "North America",
+    "south_america": "South America",
+    "asia": "Asia",
+    "oceania": "Oceania"
+  }
+}

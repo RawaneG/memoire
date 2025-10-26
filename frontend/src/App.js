@@ -11,7 +11,8 @@ import {
   CheckCircle,
   Activity,
   Calendar,
-  Target
+  Target,
+  Filter
 } from 'lucide-react';
 
 // Components
@@ -23,6 +24,7 @@ import ModelSelector from './components/ModelSelector';
 import MetricsDisplay from './components/MetricsDisplay';
 import OfflineNotice from './components/OfflineNotice';
 import LanguageSwitcher from './components/LanguageSwitcher';
+import CleaningLevelSelector from './components/CleaningLevelSelector';
 
 // Hooks
 import { useApi } from './hooks/useApi';
@@ -32,13 +34,14 @@ const App = () => {
   const [country, setCountry] = useState('Senegal');
   const [model, setModel] = useState('random_forest');
   const [horizon, setHorizon] = useState(14);
+  const [cleaningLevel, setCleaningLevel] = useState('standard');
   const [predictions, setPredictions] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [activeDropdown, setActiveDropdown] = useState(null);
 
   const { loading, error, predict, clearError } = useApi();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   // Animation variants
   const containerVariants = {
@@ -83,7 +86,7 @@ const App = () => {
     }
 
     try {
-      const result = await predict(country, model, horizon);
+      const result = await predict(country, model, horizon, cleaningLevel, i18n.language);
       setPredictions(result);
     } catch (err) {
       console.error('Prediction failed:', err);
@@ -167,9 +170,7 @@ const App = () => {
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.2, duration: 0.8 }}
               >
-                <span className="gradient-text">OWID</span>
-                <br />
-                <span className="text-white/90">Predictor</span>
+                <span className="gradient-text">{t('app.title')}</span>
               </motion.h1>
 
               <motion.p
@@ -178,9 +179,7 @@ const App = () => {
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.4, duration: 0.8 }}
               >
-                Advanced machine learning models for COVID-19 case prediction with
-                <span className="text-primary-400 font-semibold"> country-specific optimizations</span>
-                , especially for Senegal.
+                {t('app.description')}
               </motion.p>
             </div>
           </div>
@@ -237,6 +236,20 @@ const App = () => {
                       />
                     </div>
 
+                    {/* Cleaning Level Selection */}
+                    <div>
+                      <label className="block text-sm font-semibold text-white/80 mb-3">
+                        <Filter className="w-4 h-4 inline mr-2" />
+{t('cleaningLevel.title')}
+                      </label>
+                      <CleaningLevelSelector
+                        value={cleaningLevel}
+                        onChange={setCleaningLevel}
+                        onToggle={handleDropdownToggle}
+                        shouldClose={shouldCloseDropdown('cleaning')}
+                      />
+                    </div>
+
                     {/* Horizon Selection */}
                     <div>
                       <label className="block text-sm font-semibold text-white/80 mb-3">
@@ -256,7 +269,7 @@ const App = () => {
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                           >
-                            {days}d
+                            {days}{t('horizon.dayShort')}
                           </motion.button>
                         ))}
                       </div>
@@ -317,7 +330,12 @@ const App = () => {
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                         >
-                          {['Fetching data', 'Processing features', 'Training model', 'Generating predictions'].map((step, index) => (
+                          {[
+                            t('processingSteps.fetchingData'),
+                            t('processingSteps.processingFeatures'),
+                            t('processingSteps.trainingModel'),
+                            t('processingSteps.generatingPredictions')
+                          ].map((step, index) => (
                             <motion.div
                               key={step}
                               className={`flex items-center space-x-3 text-sm ${index <= currentStep ? 'text-white' : 'text-white/40'
@@ -378,9 +396,9 @@ const App = () => {
                           <div className="p-2 bg-gradient-to-r from-green-500 to-blue-500 rounded-xl">
                             <BarChart3 className="w-6 h-6 text-white" />
                           </div>
-                          <h3 className="text-2xl font-bold text-white">Prediction Results</h3>
+                          <h3 className="text-2xl font-bold text-white">{t('predictionResults.title')}</h3>
                           <div className="ml-auto px-3 py-1 bg-green-500/20 text-green-400 rounded-full border border-green-500/30 text-sm font-medium">
-                            {predictions.horizon_days} days
+                            {predictions.horizon_days} {t('horizon.days')}
                           </div>
                         </div>
 

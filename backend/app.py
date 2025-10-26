@@ -11,8 +11,77 @@ par pays, notamment pour le Sénégal.
 """
 
 from flask import Flask, request, jsonify
-from spark_model import predict_cases, get_available_countries, COUNTRY_CONFIGS, predict_all_configured_countries, get_configured_countries
+from flask_cors import CORS
+from spark_model import (
+    predict_cases,
+    get_available_countries,
+    COUNTRY_CONFIGS,
+    predict_all_configured_countries,
+    get_configured_countries,
+    warmup_spark,
+)
 import logging
+import threading
+import traceback
+import uuid
+from typing import Dict
+
+# ---------------------------------------------------------------------------
+# Lightweight i18n helpers (previously missing caused NameError on first call)
+# ---------------------------------------------------------------------------
+
+_TRANSLATIONS: Dict[str, Dict[str, str]] = {
+    'fr': {
+        'api.errors.country_required': 'Le paramètre "country" est requis',
+        'api.errors.model_not_supported': 'Modèle non supporté: {model}',
+        'api.errors.horizon_range': 'Horizon doit être entre 1 et 30 jours',
+        'api.errors.cleaning_level_invalid': 'Niveau de nettoyage invalide',
+        'api.messages.prediction_start': 'Démarrage de la prédiction pour {country} avec le modèle {model} (horizon={horizon})',
+        'data_cleaning.median_info': 'Médiane: {median:.2f}, limite max: {max_limit:.2f}',
+        'data_cleaning.median_error': 'Erreur de calcul de médiane: {error}',
+        'data_cleaning.insufficient_after_preprocessing': 'Données insuffisantes après preprocessing pour {country} (lignes={count})',
+    },
+    'en': {
+        'api.errors.country_required': 'Country parameter is required',
+        'api.errors.model_not_supported': 'Model not supported: {model}',
+        'api.errors.horizon_range': 'Horizon must be between 1 and 30 days',
+        'api.errors.cleaning_level_invalid': 'Invalid cleaning level',
+        'api.messages.prediction_start': 'Starting prediction for {country} using model {model} (horizon={horizon})',
+        'data_cleaning.median_info': 'Median: {median:.2f}, max limit: {max_limit:.2f}',
+        'data_cleaning.median_error': 'Median computation error: {error}',
+        'data_cleaning.insufficient_after_preprocessing': 'Insufficient data after preprocessing for {country} (rows={count})',
+    }
+}
+
+def get_lang_from_request() -> str:
+    return request.args.get('lang', 'fr') if request else 'fr'
+
+def set_language(lang: str):  # placeholder for future integration (no-op)
+    pass
+
+def t(key: str, lang: str = 'fr', **kwargs) -> str:
+    lang_dict = _TRANSLATIONS.get(lang, _TRANSLATIONS['fr'])
+    template = lang_dict.get(key, key)
+    try:
+        return template.format(**kwargs)
+    except Exception:
+        return template
+
+def get_models_translated(lang: str = 'fr'):
+    # For now just return AVAILABLE_MODELS (names already localized FR)
+    # Could extend to provide English names when lang == 'en'.
+    if lang == 'en':
+        translated = {}
+        for k, v in AVAILABLE_MODELS.items():
+            translated[k] = {**v}
+            # Provide extremely simple English replacements if French accents present
+            translated[k]['name'] = {
+                'Régression Linéaire': 'Linear Regression',
+                'Forêt Aléatoire': 'Random Forest',
+                'Gradient Boosting': 'Gradient Boosting'
+            }.get(v['name'], v['name'])
+        return translated
+    return AVAILABLE_MODELS
 
 # Configuration du logging
 logging.basicConfig(level=logging.INFO)
@@ -20,19 +89,16 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
-# Manual CORS configuration
-@app.after_request
-def after_request(response):
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-    return response
-
-# Handle preflight requests
-@app.route('/<path:path>', methods=['OPTIONS'])
-@app.route('/', methods=['OPTIONS'])
-def handle_options(path=None):
-    return '', 200
+# Unified CORS via Flask-CORS (safer & less boilerplate)
+CORS(
+    app,
+    resources={r"/*": {"origins": "*"}},
+    supports_credentials=False,
+    allow_headers=["*"],  # Accept any header (simplifies dev; tighten later if needed)
+    expose_headers=["Content-Type"],
+    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    max_age=3600,
+)
 
 # Configuration des modèles disponibles
 AVAILABLE_MODELS = {
@@ -62,61 +128,80 @@ def predict():
       - country : nom du pays (ex. "Senegal", "France")
       - model : type de modèle ("linear", "random_forest", "gradient_boost")
       - horizon : nombre de jours à prédire (1-30, défaut: 14)
+      - cleaning_level : niveau de nettoyage ("minimal", "standard", "strict")
+      - lang : langue ("fr", "en")
       - data_path : chemin vers les données (optionnel)
 
     Retour : JSON avec prédictions et métriques du modèle
     """
+    lang = get_lang_from_request()
+    set_language(lang)
+
     country = request.args.get('country')
     model = request.args.get('model', default='linear')
     horizon = request.args.get('horizon', 14, type=int)
+    cleaning_level = request.args.get('cleaning_level', default='standard')
     data_path = request.args.get('data_path', 'owid-covid-data.csv')
-    
+
     # Validation des paramètres
     if not country:
         return jsonify({
-            'error': 'Paramètre "country" requis',
+            'error': t('api.errors.country_required', lang=lang),
             'available_countries_sample': ['Senegal', 'Nigeria', 'South Africa', 'Kenya', 'Morocco', 'France', 'Germany', 'United Kingdom', 'United States', 'Canada']
         }), 400
-        
+
     if model not in AVAILABLE_MODELS:
         return jsonify({
-            'error': f'Modèle "{model}" non supporté',
+            'error': t('api.errors.model_not_supported', model=model, lang=lang),
             'available_models': list(AVAILABLE_MODELS.keys())
         }), 400
-        
+
     if not (1 <= horizon <= 30):
         return jsonify({
-            'error': 'Horizon doit être entre 1 et 30 jours'
+            'error': t('api.errors.horizon_range', lang=lang)
         }), 400
-    
+
+    if cleaning_level not in ['minimal', 'standard', 'strict']:
+        return jsonify({
+            'error': t('api.errors.cleaning_level_invalid', lang=lang),
+            'available_levels': ['minimal', 'standard', 'strict']
+        }), 400
+
     try:
-        logger.info(f"Prédiction pour {country} avec modèle {model}, horizon {horizon} jours")
-        
+        request_id = uuid.uuid4().hex[:8]
+        logger.info(f"[{request_id}] " + t('api.messages.prediction_start', country=country, model=model, horizon=horizon, lang=lang))
+
         result = predict_cases(
-            country=country, 
-            model_type=model, 
+            country=country,
+            model_type=model,
             horizon=horizon,
-            data_path=data_path
+            data_path=data_path,
+            lang=lang,
+            cleaning_level=cleaning_level
         )
         
         # Enrichir la réponse avec des informations sur le modèle
-        result['model_info'] = AVAILABLE_MODELS[model]
+        result['model_info'] = get_models_translated(lang)[model]
         result['request_params'] = {
             'country': country,
-            'model': model, 
-            'horizon': horizon
+            'model': model,
+            'horizon': horizon,
+            'cleaning_level': cleaning_level,
+            'lang': lang
         }
         
         logger.info(f"Prédiction réussie - RMSE: {result['metrics']['rmse']:.2f}")
         return jsonify(result)
         
     except ValueError as ve:
-        logger.error(f"Erreur de validation: {str(ve)}")
+        logger.error(f"Validation error: {ve}")
         return jsonify({'error': str(ve)}), 400
     except Exception as exc:
-        logger.error(f"Erreur lors de la prédiction pour {country}: {str(exc)}")
+        err_id = uuid.uuid4().hex[:8]
+        logger.error(f"[ERROR {err_id}] Prediction failure for {country}: {exc}\n{traceback.format_exc()}")
         return jsonify({
             'error': 'Erreur interne du serveur',
+            'error_id': err_id,
             'details': str(exc)
         }), 500
 
@@ -226,9 +311,21 @@ def models():
 @app.route('/health', methods=['GET'])
 def health():
     """Endpoint de santé pour vérifier le statut du service."""
+    lang = get_lang_from_request()
+    # Load translations from JSON files
+    import json
+    import os
+    locale_path = os.path.join(os.path.dirname(__file__), 'i18n', 'locales', f'{lang}.json')
+    try:
+        with open(locale_path, 'r', encoding='utf-8') as f:
+            translations = json.load(f)
+        service_name = translations.get('health', {}).get('service', 'SEN Prediction API')
+    except:
+        service_name = 'SEN Prediction API'
+
     return jsonify({
         'status': 'healthy',
-        'service': 'OWID COVID-19 Prediction API',
+        'service': service_name,
         'version': '2.0',
         'features': ['multi-model', 'country-specific', 'senegal-optimized']
     })
@@ -237,22 +334,52 @@ def health():
 @app.route('/', methods=['GET'])
 def home():
     """Page d'accueil avec documentation de l'API."""
+    lang = get_lang_from_request()
+    # Load translations from JSON files
+    import json
+    import os
+    locale_path = os.path.join(os.path.dirname(__file__), 'i18n', 'locales', f'{lang}.json')
+    try:
+        with open(locale_path, 'r', encoding='utf-8') as f:
+            translations = json.load(f)
+        home_msg = translations.get('home', {}).get('message', 'API SEN Prediction')
+        endpoints_trans = translations.get('api', {}).get('endpoints', {})
+        example_req = translations.get('home', {}).get('example_request', '/predict?country=Senegal&model=random_forest&horizon=7&cleaning_level=standard&lang=fr')
+        doc_url = translations.get('home', {}).get('documentation', 'https://github.com/your-repo/sen-prediction-api')
+    except:
+        home_msg = 'API SEN Prediction'
+        endpoints_trans = {}
+        example_req = '/predict?country=Senegal&model=random_forest&horizon=7&cleaning_level=standard&lang=fr'
+        doc_url = 'https://github.com/your-repo/sen-prediction-api'
+
     return jsonify({
-        'message': 'API de Prédiction COVID-19 OWID',
+        'message': home_msg,
         'endpoints': {
-            '/predict': 'GET - Générer des prédictions pour un pays',
-            '/predict_all': 'GET - Générer des prédictions pour tous les pays configurés',
-            '/countries': 'GET - Liste des pays disponibles', 
-            '/models': 'GET - Liste des modèles ML disponibles',
-            '/health': 'GET - Statut du service'
+            '/predict': endpoints_trans.get('predict', 'GET - Générer des prédictions pour un pays'),
+            '/predict_all': endpoints_trans.get('predict_all', 'GET - Générer des prédictions pour tous les pays configurés'),
+            '/countries': endpoints_trans.get('countries', 'GET - Liste des pays disponibles'),
+            '/models': endpoints_trans.get('models', 'GET - Liste des modèles ML disponibles'),
+            '/health': endpoints_trans.get('health', 'GET - Statut du service')
         },
-        'example_request': '/predict?country=Senegal&model=random_forest&horizon=7',
-        'documentation': 'https://github.com/your-repo/owid-prediction-api'
+        'example_request': example_req,
+        'documentation': doc_url
     })
 
 
 if __name__ == '__main__':
     # Lancer le serveur en mode développement
     # En production, utiliser un serveur WSGI (gunicorn, uwsgi, etc.)
-    logger.info("Démarrage du serveur de prédiction OWID...")
+    logger.info("Démarrage du serveur SEN Prediction...")
+
+    # Optionnel: démarrer une tâche de préchauffage Spark pour le premier pays
+    def _warmup():
+        try:
+            warmup_spark()
+            logger.info("Warmup Spark base session done; triggering lightweight prediction cache build...")
+            predict_cases(country='Senegal', model_type='random_forest', horizon=1, data_path='owid-covid-data-sample.csv')
+            logger.info("Warmup prédiction terminé")
+        except Exception as e:
+            logger.warning(f"Échec du warmup (non bloquant): {e}")
+
+    threading.Thread(target=_warmup, daemon=True).start()
     app.run(host='0.0.0.0', port=5000, debug=True)
