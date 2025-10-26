@@ -137,6 +137,7 @@
     "title": "Prediction Horizon",
     "subtitle": "Select the prediction period",
     "days": "days",
+    "dayShort": "d",
     "options": {
       "7": "1 week",
       "14": "2 weeks",

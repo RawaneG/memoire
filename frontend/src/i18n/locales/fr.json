@@ -137,6 +137,7 @@
     "title": "Horizon de Prédiction",
     "subtitle": "Sélectionnez la période de prédiction",
     "days": "jours",
+    "dayShort": "j",
     "options": {
       "7": "1 semaine",
       "14": "2 semaines",

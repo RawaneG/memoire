@@ -269,7 +269,7 @@ const App = () => {
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                           >
-                            {days}d
+                            {days}{t('horizon.dayShort')}
                           </motion.button>
                         ))}
                       </div>
