@@ -15,7 +15,7 @@
       "prediction_start": "Prediction for {country} with model {model}, horizon {horizon} days",
       "prediction_all_start": "Prediction for all configured countries with model {model}, horizon {horizon} days",
       "prediction_all_success": "Prediction successful for {count} countries",
-      "server_starting": "Starting OWID prediction server..."
+      "server_starting": "Starting SEN Prediction server..."
     },
     "endpoints": {
       "predict": "GET - Generate predictions for a country",
@@ -95,14 +95,14 @@
   },
   "health": {
     "status": "healthy",
-    "service": "OWID COVID-19 Prediction API",
+    "service": "SEN Prediction API",
     "version": "2.0",
     "features": ["multi-model", "country-specific", "senegal-optimized"]
   },
   "home": {
-    "message": "OWID COVID-19 Prediction API",
+    "message": "SEN Prediction API",
     "example_request": "/predict?country=Senegal&model=random_forest&horizon=7&cleaning_level=standard&lang=en",
-    "documentation": "https://github.com/your-repo/owid-prediction-api"
+    "documentation": "https://github.com/your-repo/sen-prediction-api"
   },
   "countries": {
     "africa": "Africa",

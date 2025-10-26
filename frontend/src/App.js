@@ -170,9 +170,7 @@ const App = () => {
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.2, duration: 0.8 }}
               >
-                <span className="gradient-text">OWID</span>
-                <br />
-                <span className="text-white/90">Predictor</span>
+                <span className="gradient-text">{t('app.title')}</span>
               </motion.h1>
 
               <motion.p
@@ -181,9 +179,7 @@ const App = () => {
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.4, duration: 0.8 }}
               >
-                Advanced machine learning models for COVID-19 case prediction with
-                <span className="text-primary-400 font-semibold"> country-specific optimizations</span>
-                , especially for Senegal.
+                {t('app.description')}
               </motion.p>
             </div>
           </div>
@@ -334,7 +330,12 @@ const App = () => {
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                         >
-                          {['Fetching data', 'Processing features', 'Training model', 'Generating predictions'].map((step, index) => (
+                          {[
+                            t('processingSteps.fetchingData'),
+                            t('processingSteps.processingFeatures'),
+                            t('processingSteps.trainingModel'),
+                            t('processingSteps.generatingPredictions')
+                          ].map((step, index) => (
                             <motion.div
                               key={step}
                               className={`flex items-center space-x-3 text-sm ${index <= currentStep ? 'text-white' : 'text-white/40'
@@ -395,9 +396,9 @@ const App = () => {
                           <div className="p-2 bg-gradient-to-r from-green-500 to-blue-500 rounded-xl">
                             <BarChart3 className="w-6 h-6 text-white" />
                           </div>
-                          <h3 className="text-2xl font-bold text-white">Prediction Results</h3>
+                          <h3 className="text-2xl font-bold text-white">{t('predictionResults.title')}</h3>
                           <div className="ml-auto px-3 py-1 bg-green-500/20 text-green-400 rounded-full border border-green-500/30 text-sm font-medium">
-                            {predictions.horizon_days} days
+                            {predictions.horizon_days} {t('horizon.days')}
                           </div>
                         </div>
 

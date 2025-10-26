@@ -311,9 +311,21 @@ def models():
 @app.route('/health', methods=['GET'])
 def health():
     """Endpoint de santé pour vérifier le statut du service."""
+    lang = get_lang_from_request()
+    # Load translations from JSON files
+    import json
+    import os
+    locale_path = os.path.join(os.path.dirname(__file__), 'i18n', 'locales', f'{lang}.json')
+    try:
+        with open(locale_path, 'r', encoding='utf-8') as f:
+            translations = json.load(f)
+        service_name = translations.get('health', {}).get('service', 'SEN Prediction API')
+    except:
+        service_name = 'SEN Prediction API'
+
     return jsonify({
         'status': 'healthy',
-        'service': 'OWID COVID-19 Prediction API',
+        'service': service_name,
         'version': '2.0',
         'features': ['multi-model', 'country-specific', 'senegal-optimized']
     })
@@ -322,24 +334,42 @@ def health():
 @app.route('/', methods=['GET'])
 def home():
     """Page d'accueil avec documentation de l'API."""
+    lang = get_lang_from_request()
+    # Load translations from JSON files
+    import json
+    import os
+    locale_path = os.path.join(os.path.dirname(__file__), 'i18n', 'locales', f'{lang}.json')
+    try:
+        with open(locale_path, 'r', encoding='utf-8') as f:
+            translations = json.load(f)
+        home_msg = translations.get('home', {}).get('message', 'API SEN Prediction')
+        endpoints_trans = translations.get('api', {}).get('endpoints', {})
+        example_req = translations.get('home', {}).get('example_request', '/predict?country=Senegal&model=random_forest&horizon=7&cleaning_level=standard&lang=fr')
+        doc_url = translations.get('home', {}).get('documentation', 'https://github.com/your-repo/sen-prediction-api')
+    except:
+        home_msg = 'API SEN Prediction'
+        endpoints_trans = {}
+        example_req = '/predict?country=Senegal&model=random_forest&horizon=7&cleaning_level=standard&lang=fr'
+        doc_url = 'https://github.com/your-repo/sen-prediction-api'
+
     return jsonify({
-        'message': 'API de Prédiction COVID-19 OWID',
+        'message': home_msg,
         'endpoints': {
-            '/predict': 'GET - Générer des prédictions pour un pays',
-            '/predict_all': 'GET - Générer des prédictions pour tous les pays configurés',
-            '/countries': 'GET - Liste des pays disponibles', 
-            '/models': 'GET - Liste des modèles ML disponibles',
-            '/health': 'GET - Statut du service'
+            '/predict': endpoints_trans.get('predict', 'GET - Générer des prédictions pour un pays'),
+            '/predict_all': endpoints_trans.get('predict_all', 'GET - Générer des prédictions pour tous les pays configurés'),
+            '/countries': endpoints_trans.get('countries', 'GET - Liste des pays disponibles'),
+            '/models': endpoints_trans.get('models', 'GET - Liste des modèles ML disponibles'),
+            '/health': endpoints_trans.get('health', 'GET - Statut du service')
         },
-        'example_request': '/predict?country=Senegal&model=random_forest&horizon=7',
-        'documentation': 'https://github.com/your-repo/owid-prediction-api'
+        'example_request': example_req,
+        'documentation': doc_url
     })
 
 
 if __name__ == '__main__':
     # Lancer le serveur en mode développement
     # En production, utiliser un serveur WSGI (gunicorn, uwsgi, etc.)
-    logger.info("Démarrage du serveur de prédiction OWID...")
+    logger.info("Démarrage du serveur SEN Prediction...")
 
     # Optionnel: démarrer une tâche de préchauffage Spark pour le premier pays
     def _warmup():

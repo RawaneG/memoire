@@ -15,7 +15,7 @@ import threading
 _SPARK_LOCK = threading.Lock()
 _SPARK_SESSION: Optional[SparkSession] = None
 
-def get_spark(app_name: str = "OWIDPrediction") -> SparkSession:
+def get_spark(app_name: str = "SENPrediction") -> SparkSession:
     global _SPARK_SESSION
     if _SPARK_SESSION is not None:
         return _SPARK_SESSION
@@ -39,7 +39,7 @@ def get_spark(app_name: str = "OWIDPrediction") -> SparkSession:
 
 def warmup_spark(data_path: str = "owid-covid-data-sample.csv"):
     try:
-        spark = get_spark("OWIDPredictionWarmup")
+        spark = get_spark("SENPredictionWarmup")
         spark.read.csv(data_path, header=True, inferSchema=True).select("location").limit(5).collect()
         logging.info("[Spark] Warmup completed")
     except Exception as e:
@@ -133,7 +133,7 @@ COUNTRY_CONFIGS = {
 
 def get_available_countries(data_path: str = "owid-covid-data.csv") -> List[str]:
     """Retourne la liste des pays disponibles dans le dataset."""
-    spark = get_spark("OWIDCountryList")
+    spark = get_spark("SENCountryList")
     try:
         try:
             df = spark.read.csv(data_path, header=True, inferSchema=True)
@@ -182,7 +182,7 @@ def predict_cases(country: str, model_type: str = 'linear', horizon: int = 14,
         country: Nom du pays (ex: 'Senegal', 'France')
         model_type: Type de modèle ('linear', 'random_forest', 'gradient_boost')
         horizon: Nombre de jours à prédire
-        data_path: Chemin vers le fichier de données OWID
+        data_path: Chemin vers le fichier de données COVID-19
         lang: Langue pour les messages ('fr' ou 'en')
         cleaning_level: Niveau de nettoyage ('minimal', 'standard', 'strict')
             - minimal: Remplace NULL par 0 uniquement
@@ -194,10 +194,10 @@ def predict_cases(country: str, model_type: str = 'linear', horizon: int = 14,
     """
     
     # Créer une session Spark
-    spark = get_spark(f"OWIDPrediction_{country}")
-    
+    spark = get_spark(f"SENPrediction_{country}")
+
     try:
-        # Charger les données OWID
+        # Charger les données COVID-19
         try:
             df = spark.read.csv(data_path, header=True, inferSchema=True)
         except Exception:
@@ -472,7 +472,7 @@ def predict_all_configured_countries(model_type: str = 'linear', horizon: int = 
     Args:
         model_type: Type de modèle ('linear', 'random_forest', 'gradient_boost')
         horizon: Nombre de jours à prédire
-        data_path: Chemin vers le fichier de données OWID
+        data_path: Chemin vers le fichier de données COVID-19
         
     Returns:
         Dict contenant les prédictions pour tous les pays configurés

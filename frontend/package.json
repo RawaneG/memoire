@@ -1,5 +1,5 @@
 {
-  "name": "owid-predictor",
+  "name": "sen-prediction",
   "version": "2.0.0",
   "private": true,
   "dependencies": {

@@ -1,10 +1,10 @@
-# 📊 OWID COVID-19 Predictor
+# 📊 SEN Prediction
 
 Une application web moderne de prédiction COVID-19 utilisant l'intelligence artificielle et des modèles d'apprentissage automatique avancés, avec une interface utilisateur primée et des optimisations spécifiques pour 10 pays stratégiques.
 
 ## 🎯 Aperçu du Projet
 
-OWID Predictor combine des visualisations de données interactives avec des modèles ML sophistiqués pour fournir des prédictions précises des cas COVID-19. L'application utilise React avec des animations Framer Motion fluides et un backend Flask robuste avec Apache Spark et plusieurs algorithmes d'apprentissage automatique avancés.
+SEN Prediction combine des visualisations de données interactives avec des modèles ML sophistiqués pour fournir des prédictions précises des cas COVID-19. L'application utilise React avec des animations Framer Motion fluides et un backend Flask robuste avec Apache Spark et plusieurs algorithmes d'apprentissage automatique avancés.
 
 ### ✨ Fonctionnalités Principales
 
@@ -13,7 +13,7 @@ OWID Predictor combine des visualisations de données interactives avec des mod�
 - 📈 **Visualisations Interactives** - Graphiques avec intervalles de confiance
 - 🎨 **Interface Moderne** - Design glassmorphism avec animations fluides
 - ⚡ **Performance Optimisée** - Apache Spark pour le traitement des données à grande échelle
-- 🌟 **Données Réelles OWID** - Plus de 429,000 enregistrements avec 67 variables
+- 🌟 **Données Réelles** - Plus de 429,000 enregistrements avec 67 variables
 - 🎯 **Prédictions Spécialisées** - Modèles recommandés par pays et continent
 - 🌐 **Internationalisation** - Support complet français/anglais avec détection automatique
 - 🔄 **Mode Hors-ligne** - Données de fallback et prédictions simulées
@@ -67,7 +67,7 @@ const environments = {
 
 ```bash
 git clone <votre-repository>
-cd OWID
+cd SEN-Prediction
 ```
 
 #### 2. Configuration Backend
@@ -119,13 +119,13 @@ L'application sera disponible sur `http://localhost:3000`
 ### 📁 Structure du Projet
 
 ```
-OWID/
+SEN-Prediction/
 ├── backend/                     # API Flask et modèles ML
 │   ├── app.py                  # Serveur principal avec Apache Spark
 │   ├── simple_app.py           # Version simplifiée (optionnelle)
 │   ├── spark_model.py          # Modèles ML avec Spark
 │   ├── requirements.txt        # Dépendances Python
-│   └── owid-covid-data-sample.csv  # Données OWID réelles (429k+ enregistrements)
+│   └── owid-covid-data-sample.csv  # Données réelles (429k+ enregistrements)
 ├── frontend/                   # Application React
 │   ├── src/
 │   │   ├── components/         # Composants réutilisables
@@ -266,7 +266,7 @@ GET /health
 ```json
 {
   "status": "healthy",
-  "service": "OWID COVID-19 Prediction API",
+  "service": "SEN Prediction API",
   "version": "2.0",
   "features": ["multi-model", "country-specific", "senegal-optimized"]
 }
@@ -604,7 +604,7 @@ Si le build Vercel échoue avec un conflit de dépendances lié à TypeScript et
 echo "web: python app.py" > Procfile
 
 # Configuration Heroku
-heroku create owid-predictor-api
+heroku create sen-prediction-api
 git push heroku main
 
 # Variables d'environnement
@@ -782,7 +782,7 @@ Développé avec ❤️ pour la prédiction intelligente des cas COVID-19, avec 
 
 **Technologies clés:** React • Flask • Apache Spark • Framer Motion • Tailwind CSS • PySpark ML • Recharts
 
-**Données:** Our World in Data (OWID) - Plus de 429,000+ enregistrements COVID-19 avec 67 variables détaillées
+**Données:** Our World in Data - Plus de 429,000+ enregistrements COVID-19 avec 67 variables détaillées
 
 **Optimisations régionales:** Modèles spécialisés par continent avec configurations adaptées aux caractéristiques épidémiologiques et socio-économiques de chaque région.
 

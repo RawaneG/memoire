@@ -1,7 +1,8 @@
 {
   "app": {
-    "title": "Prédicteur COVID-19 OWID",
-    "subtitle": "Prédictions alimentées par l'IA avec des modèles d'apprentissage automatique avancés"
+    "title": "SEN Prediction",
+    "subtitle": "Prédictions alimentées par l'IA avec des modèles d'apprentissage automatique avancés",
+    "description": "Modèles d'apprentissage automatique avancés pour la prédiction des cas COVID-19 avec des optimisations spécifiques par pays, en particulier pour le Sénégal."
   },
   "navigation": {
     "home": "Accueil",
@@ -101,6 +102,9 @@
     "processingFeatures": "Traitement des fonctionnalités",
     "trainingModel": "Entraînement du modèle",
     "generatingPredictions": "Génération des prédictions"
+  },
+  "predictionResults": {
+    "title": "Résultats de Prédiction"
   },
   "metricsDisplay": {
     "modelPerformance": "Performance du Modèle",

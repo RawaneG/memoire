@@ -160,7 +160,7 @@ def health():
     """Health check endpoint."""
     return jsonify({
         'status': 'healthy',
-        'service': 'OWID COVID-19 Prediction API (Simple)',
+        'service': 'SEN Prediction API (Simple)',
         'version': '2.0-simple',
         'features': ['multi-model', 'country-specific', 'senegal-optimized', 'demo-data']
     })
@@ -169,10 +169,10 @@ def health():
 def home():
     """API documentation."""
     return jsonify({
-        'message': 'API de Prédiction COVID-19 OWID (Version Simple)',
+        'message': 'API SEN Prediction (Version Simple)',
         'endpoints': {
             '/predict': 'GET - Générer des prédictions pour un pays',
-            '/countries': 'GET - Liste des pays disponibles', 
+            '/countries': 'GET - Liste des pays disponibles',
             '/models': 'GET - Liste des modèles ML disponibles',
             '/health': 'GET - Statut du service'
         },
@@ -181,5 +181,5 @@ def home():
     })
 
 if __name__ == '__main__':
-    logger.info("Démarrage du serveur de prédiction OWID (version simple)...")
+    logger.info("Démarrage du serveur SEN Prediction (version simple)...")
     app.run(host='0.0.0.0', port=5000, debug=True)

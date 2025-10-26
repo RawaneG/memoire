@@ -1,7 +1,8 @@
 {
   "app": {
-    "title": "OWID COVID-19 Predictor",
-    "subtitle": "AI-powered predictions with advanced machine learning models"
+    "title": "SEN Prediction",
+    "subtitle": "AI-powered predictions with advanced machine learning models",
+    "description": "Advanced machine learning models for COVID-19 case prediction with country-specific optimizations, especially for Senegal."
   },
   "navigation": {
     "home": "Home",
@@ -101,6 +102,9 @@
     "processingFeatures": "Processing features",
     "trainingModel": "Training model",
     "generatingPredictions": "Generating predictions"
+  },
+  "predictionResults": {
+    "title": "Prediction Results"
   },
   "metricsDisplay": {
     "modelPerformance": "Model Performance",
