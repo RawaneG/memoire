@@ -208,9 +208,7 @@ const MetricsDisplay = ({ predictions }) => {
               <div>
                 <div className="text-sm text-white/60">{t('metricsDisplay.modelType')}</div>
                 <div className="text-white font-semibold">
-                  {model_type === 'random_forest' ? 'Random Forest' : 
-                   model_type === 'gradient_boost' ? 'Gradient Boosting' : 
-                   'Linear Regression'}
+                  {t(`modelSelector.models.${model_type}.name`)}
                 </div>
               </div>
             </div>

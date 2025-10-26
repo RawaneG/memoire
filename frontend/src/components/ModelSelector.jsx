@@ -9,28 +9,30 @@ const ModelSelector = ({ value, onChange, country, onToggle, shouldClose }) => {
   const dropdownRef = useRef(null);
   const buttonRef = useRef(null);
   const { t } = useTranslation();
-  const [models] = useState({
+
+  // Get models data from translations
+  const getModels = () => ({
     available_models: {
       linear: {
-        name: 'Linear Regression',
-        description: 'Simple, fast and interpretable',
-        best_for: ['limited data', 'linear trends'],
+        name: t('modelSelector.models.linear.name'),
+        description: t('modelSelector.models.linear.description'),
+        bestFor: t('modelSelector.models.linear.bestFor'),
         complexity: 'Low',
         accuracy: 'Medium',
         speed: 'Fast'
       },
       random_forest: {
-        name: 'Random Forest',
-        description: 'Robust ensemble model',
-        best_for: ['complex data', 'non-linear relationships'],
+        name: t('modelSelector.models.random_forest.name'),
+        description: t('modelSelector.models.random_forest.description'),
+        bestFor: t('modelSelector.models.random_forest.bestFor'),
         complexity: 'Medium',
         accuracy: 'High',
         speed: 'Medium'
       },
       gradient_boost: {
-        name: 'Gradient Boosting',
-        description: 'Advanced high-precision model',
-        best_for: ['precise predictions', 'large datasets'],
+        name: t('modelSelector.models.gradient_boost.name'),
+        description: t('modelSelector.models.gradient_boost.description'),
+        bestFor: t('modelSelector.models.gradient_boost.bestFor'),
         complexity: 'High',
         accuracy: 'Very High',
         speed: 'Slow'
@@ -42,6 +44,8 @@ const ModelSelector = ({ value, onChange, country, onToggle, shouldClose }) => {
       Germany: 'gradient_boost'
     }
   });
+
+  const models = getModels();
 
   const getRecommendedModel = () => {
     return models.recommended_by_country[country] || 'random_forest';
@@ -265,7 +269,7 @@ const ModelSelector = ({ value, onChange, country, onToggle, shouldClose }) => {
                       <div className="mt-3 pt-3 border-t border-white/10">
                         <div className="flex items-center space-x-2 text-xs text-white/60">
                           <Info className="w-3 h-3" />
-                          <span>{t('modelSelector.bestFor')}: {model.best_for.join(', ')}</span>
+                          <span>{model.bestFor}</span>
                         </div>
                       </div>
                     </motion.button>
