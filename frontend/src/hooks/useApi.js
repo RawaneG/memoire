@@ -83,6 +83,18 @@ export const useApi = () => {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
+        // Gérer spécifiquement le code 503 (Service Unavailable)
+        if (response.status === 503) {
+          let retryAfter = 3;
+          try {
+            const errorData = await response.json();
+            retryAfter = errorData.retry_after || 3;
+          } catch (_) {}
+          const serviceUnavailableError = new Error('Service en cours d\'initialisation');
+          serviceUnavailableError.status = 503;
+          serviceUnavailableError.retryAfter = retryAfter;
+          throw serviceUnavailableError;
+        }
         throw new Error(`API Error: ${response.status} ${response.statusText}`);
       }
 
@@ -133,6 +145,18 @@ export const useApi = () => {
     try {
       return await request(`/predict?${params}`);
     } catch (err) {
+      // Gérer le 503 avec un retry après le délai recommandé
+      if (err.status === 503) {
+        const retryDelay = (err.retryAfter || 3) * 1000;
+        console.warn(`Service en initialisation, retry dans ${retryDelay}ms...`);
+        await new Promise(r => setTimeout(r, retryDelay));
+        try {
+          return await request(`/predict?${params}`);
+        } catch (retryErr) {
+          console.warn('Retry après 503 échoué, tentative finale...', retryErr);
+        }
+      }
+
       // Retry once after a short delay (handles initial Spark warmup failure)
       console.warn('Initial predict call failed, retrying once after 1s...', err);
       await new Promise(r => setTimeout(r, 1000));

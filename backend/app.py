@@ -370,16 +370,26 @@ if __name__ == '__main__':
     # Lancer le serveur en mode développement
     # En production, utiliser un serveur WSGI (gunicorn, uwsgi, etc.)
     logger.info("Démarrage du serveur SEN Prediction...")
+    logger.info("=" * 60)
+    logger.info("WARMUP EN COURS - Veuillez patienter...")
+    logger.warning("Le serveur n'acceptera pas de requêtes avant la fin du warmup")
+    logger.info("=" * 60)
 
-    # Optionnel: démarrer une tâche de préchauffage Spark pour le premier pays
-    def _warmup():
-        try:
-            warmup_spark()
-            logger.info("Warmup Spark base session done; triggering lightweight prediction cache build...")
-            predict_cases(country='Senegal', model_type='random_forest', horizon=1, data_path='owid-covid-data-sample.csv')
-            logger.info("Warmup prédiction terminé")
-        except Exception as e:
-            logger.warning(f"Échec du warmup (non bloquant): {e}")
+    # WARMUP SYNCHRONE - Bloquer jusqu'à ce que Spark soit prêt
+    try:
+        logger.info("[1/3] Initialisation de Spark...")
+        warmup_spark()
+        logger.info("[2/3] Chargement des données de test...")
+        logger.info("[3/3] Test de prédiction avec le Sénégal...")
+        predict_cases(country='Senegal', model_type='random_forest', horizon=1, data_path='owid-covid-data-sample.csv')
+        logger.info("=" * 60)
+        logger.info("✓ WARMUP TERMINÉ - Service prêt à accepter les requêtes")
+        logger.info("=" * 60)
+    except Exception as e:
+        logger.error("=" * 60)
+        logger.error(f"✗ ÉCHEC DU WARMUP: {e}")
+        logger.warning("Le service continuera mais les premières requêtes peuvent échouer")
+        logger.error("=" * 60)
 
-    threading.Thread(target=_warmup, daemon=True).start()
+    logger.info("Démarrage du serveur Flask sur http://0.0.0.0:5000")
     app.run(host='0.0.0.0', port=5000, debug=True)
