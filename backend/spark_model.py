@@ -139,6 +139,12 @@ COUNTRY_CONFIGS = {
 def get_available_countries(data_path: str = "owid-covid-data.csv") -> List[str]:
     """Retourne la liste des pays disponibles dans le dataset."""
     spark = get_spark("SENCountryList")
+
+    # Si Spark n'est pas disponible, retourner la liste des pays configurés
+    if spark is None:
+        logging.warning("[Fallback] Spark unavailable, returning configured countries only")
+        return sorted(list(COUNTRY_CONFIGS.keys()))
+
     try:
         try:
             df = spark.read.csv(data_path, header=True, inferSchema=True)
@@ -149,7 +155,8 @@ def get_available_countries(data_path: str = "owid-covid-data.csv") -> List[str]
         return sorted(countries)
     except Exception as e:
         logging.error(f"Failed to list countries: {e}")
-        return []
+        # En cas d'erreur, retourner au moins les pays configurés
+        return sorted(list(COUNTRY_CONFIGS.keys()))
 
 def validate_country_data(df_country, country: str, min_rows: int = 10) -> bool:
     """Valide si le pays a suffisamment de données pour l'entraînement."""
